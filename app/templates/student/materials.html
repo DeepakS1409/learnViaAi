@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block title %}My Course Materials — Padika AI{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 30px; padding-bottom: 60px;">
+  
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
+    <div>
+      <h1 style="font-size: 2rem; font-weight: 800; color: #fff;">Course Materials</h1>
+      <p style="color: var(--text-muted); font-size: 0.95rem;">Curated by your professors for your semester curriculum</p>
+    </div>
+    
+    <div style="display: flex; gap: 10px;">
+      <a href="{{ url_for('student.bookmarks') }}" class="glass-btn glass-btn-secondary">
+        ★ My Bookmarks
+      </a>
+      <a href="{{ url_for('chat_routes.chat_view') }}" class="glass-btn glass-btn-primary">
+        ✦ Ask AI Mentor
+      </a>
+    </div>
+  </div>
+
+  <!-- FILTER & SEARCH BAR -->
+  <div class="glass-panel" style="padding: 20px 24px; margin-bottom: 32px;">
+    <form method="GET" action="{{ url_for('student.materials') }}" style="display: flex; flex-direction: column; gap: 16px;">
+      
+      <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+        
+        <!-- Search Keyword -->
+        <div style="flex: 2; min-width: 240px;">
+          <input type="text" name="search" class="glass-input" placeholder="Search by title, topic, or subject code..." value="{{ search or '' }}">
+        </div>
+
+        <!-- Subject Filter -->
+        <div style="flex: 1; min-width: 200px;">
+          <select name="subject_id" class="glass-select">
+            <option value="">All My Subjects</option>
+            {% for s in subjects %}
+              <option value="{{ s.id }}" {% if selected_subject and selected_subject|int == s.id %}selected{% endif %}>
+                {{ s.code }} — {{ s.name }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <button type="submit" class="glass-btn glass-btn-primary">
+          Filter Materials
+        </button>
+
+      </div>
+
+      <!-- Category Filter Pills -->
+      <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+        <span style="font-size: 0.82rem; font-weight: 700; color: var(--text-dim); text-transform: uppercase;">Category:</span>
+        {% for cat in ['All', 'Notes', 'Book', 'PPT', 'Question Bank', 'Syllabus'] %}
+          <a href="{{ url_for('student.materials', category=cat, subject_id=selected_subject, search=search) }}"
+             class="format-pill {% if selected_category == cat %}active{% endif %}"
+             style="text-decoration: none;">
+            {{ cat }}
+          </a>
+        {% endfor %}
+      </div>
+
+    </form>
+  </div>
+
+  <!-- MATERIALS GRID -->
+  <div class="grid-cols-3">
+    {% for mat in materials %}
+      <div class="glass-card" style="display: flex; flex-direction: column; justify-content: space-between;">
+        <div>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <span class="glass-badge glass-badge-blue">{{ mat.category }}</span>
+            <span style="font-size: 0.8rem; color: var(--text-dim);">
+              {{ mat.page_count }} Pages
+            </span>
+          </div>
+
+          <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 6px; color: #fff;">
+            {{ mat.title }}
+          </h3>
+
+          <p style="font-size: 0.85rem; color: #a78bfa; margin-bottom: 10px;">
+            {{ mat.subject_code }} — {{ mat.subject_name }}
+          </p>
+
+          <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 16px; line-height: 1.5;">
+            {{ mat.description or 'Academic reference document grounded in college course objectives.' }}
+          </p>
+
+          <div style="font-size: 0.8rem; color: var(--text-dim); margin-bottom: 16px;">
+            Uploaded by <strong>{{ mat.faculty_name }}</strong> • {{ mat.file_size|filesizeformat }}
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 8px; align-items: center; padding-top: 14px; border-top: 1px solid rgba(255, 255, 255, 0.08);">
+          <a href="{{ url_for('materials_routes.view_pdf', material_id=mat.id) }}" class="glass-btn glass-btn-sm glass-btn-secondary" style="flex: 1;">
+            📖 Read PDF
+          </a>
+          <a href="{{ url_for('chat_routes.chat_view', material_id=mat.id, subject_id=mat.subject_id) }}" class="glass-btn glass-btn-sm glass-btn-primary" style="flex: 1;" title="Ask questions about this specific document">
+            ✦ Ask AI
+          </a>
+          <button class="glass-btn glass-btn-sm bookmark-toggle-btn" data-material-id="{{ mat.id }}" title="Bookmark">
+            <span class="bookmark-icon">☆</span>
+          </button>
+        </div>
+      </div>
+    {% else %}
+      <div class="glass-card" style="grid-column: 1 / -1; text-align: center; padding: 50px;">
+        <div style="font-size: 2.5rem; margin-bottom: 12px;">🔍</div>
+        <h3 style="color: #fff; margin-bottom: 8px;">No materials found</h3>
+        <p style="color: var(--text-muted);">Try adjusting your search criteria or subject filter.</p>
+      </div>
+    {% endfor %}
+  </div>
+
+</div>
+{% endblock %}
+

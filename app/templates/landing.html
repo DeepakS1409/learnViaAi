@@ -1,0 +1,310 @@
+{% extends "base.html" %}
+
+{% block title %}Padika AI — Your Learning. Reimagined with AI.{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 40px; padding-bottom: 60px;">
+  
+  <!-- HERO SECTION -->
+  <section style="display: flex; flex-direction: column; align-items: center; text-align: center; margin-bottom: 70px; position: relative;">
+    <div class="glass-badge glass-badge-purple" style="margin-bottom: 24px; font-size: 0.85rem; padding: 6px 16px;">
+      ✦ NEXT-GENERATION COLLEGE AI LEARNING PLATFORM
+    </div>
+
+    <h1 style="font-size: clamp(2.5rem, 5.5vw, 4.2rem); font-weight: 800; line-height: 1.15; max-width: 900px; margin-bottom: 20px;">
+      Your Learning. <br>
+      <span style="background: var(--brand-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+        Reimagined with AI.
+      </span>
+    </h1>
+
+    <p style="font-size: clamp(1rem, 2vw, 1.25rem); color: var(--text-muted); max-width: 720px; margin-bottom: 36px; line-height: 1.6;">
+      Grounded exclusively in your professors' verified syllabus, lecture notes, and textbooks. 
+      Ask anything in <strong>English, தமிழ், or Tanglish</strong> and get exam-ready answers with exact page citations.
+    </p>
+
+    <div style="display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; margin-bottom: 60px;">
+      {% if current_user %}
+        <a href="{{ url_for('main.dashboard_redirect') }}" class="glass-btn glass-btn-lg glass-btn-primary">
+          Go to Your Dashboard →
+        </a>
+      {% else %}
+        <a href="{{ url_for('auth_routes.register_student') }}" class="glass-btn glass-btn-lg glass-btn-primary">
+          Get Started as Student →
+        </a>
+        <a href="{{ url_for('auth_routes.register_faculty') }}" class="glass-btn glass-btn-lg glass-btn-secondary">
+          Join as Faculty
+        </a>
+      {% endif %}
+      <a href="{{ url_for('chat_routes.chat_view') }}" class="glass-btn glass-btn-lg">
+        Try AI Chatbot ✦
+      </a>
+    </div>
+
+    <!-- FLOATING GLASS SHOWCASE CARDS -->
+    <div class="grid-cols-3" style="width: 100%; max-width: 1100px; margin-top: 10px;">
+      
+      <div class="glass-card" style="text-align: left; border-color: rgba(168, 85, 247, 0.35);">
+        <div class="stat-icon" style="background: rgba(168, 85, 247, 0.2); margin-bottom: 16px; color: #c4b5fd;">📑</div>
+        <h3 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 8px; color: #fff;">Grounded Academic RAG</h3>
+        <p style="font-size: 0.9rem; color: var(--text-muted);">
+          Never hallucinated. Responses cite the exact faculty textbook, notes title, and specific page numbers.
+        </p>
+      </div>
+
+      <div class="glass-card" style="text-align: left; border-color: rgba(56, 189, 248, 0.35);">
+        <div class="stat-icon" style="background: rgba(56, 189, 248, 0.2); margin-bottom: 16px; color: #7dd3fc;">🌐</div>
+        <h3 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 8px; color: #fff;">English • தமிழ் • Tanglish</h3>
+        <p style="font-size: 0.9rem; color: var(--text-muted);">
+          Switch between English, pure Tamil, or colloquial Tanglish ("Bro, idhu pathi explain pannunga") anytime.
+        </p>
+      </div>
+
+      <div class="glass-card" style="text-align: left; border-color: rgba(236, 72, 153, 0.35);">
+        <div class="stat-icon" style="background: rgba(236, 72, 153, 0.2); margin-bottom: 16px; color: #f472b6;">🎯</div>
+        <h3 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 8px; color: #fff;">Exam-Format Generator</h3>
+        <p style="font-size: 0.9rem; color: var(--text-muted);">
+          Instantly generate crisp 2-mark definitions, or exhaustive 13-mark & 16-mark university paper answers.
+        </p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- LIVE METRICS BAR -->
+  <section style="margin-bottom: 80px;">
+    <div class="glass-panel" style="padding: 24px 32px;">
+      <div class="grid-cols-4">
+        
+        <div style="text-align: center;">
+          <div class="stat-value">{{ stats.student_count }}+</div>
+          <div class="stat-label">Enrolled Students</div>
+        </div>
+
+        <div style="text-align: center;">
+          <div class="stat-value">{{ stats.faculty_count }}+</div>
+          <div class="stat-label">Faculty Professors</div>
+        </div>
+
+        <div style="text-align: center;">
+          <div class="stat-value">{{ stats.material_count }}</div>
+          <div class="stat-label">Verified Materials</div>
+        </div>
+
+        <div style="text-align: center;">
+          <div class="stat-value">{{ stats.ai_query_count }}+</div>
+          <div class="stat-label">AI Queries Answered</div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- AI CHATBOT PREVIEW SECTION -->
+  <section style="margin-bottom: 80px;">
+    <div style="text-align: center; margin-bottom: 40px;">
+      <span class="glass-badge glass-badge-blue">LIVE PREVIEW</span>
+      <h2 style="font-size: 2.2rem; font-weight: 800; margin-top: 12px; margin-bottom: 8px;">
+        Interactive Glassmorphism Chat Experience
+      </h2>
+      <p style="color: var(--text-muted); max-width: 600px; margin: 0 auto;">
+        Real academic questions answered with deep conceptual clarity, structured exam sections, and document source citations.
+      </p>
+    </div>
+
+    <div class="glass-panel" style="max-width: 880px; margin: 0 auto; padding: 28px; border-color: rgba(168, 85, 247, 0.4);">
+      
+      <!-- Preview Chat Controls -->
+      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 16px; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span class="glass-badge glass-badge-purple">CS3691 — AI & ML</span>
+          <span class="glass-badge glass-badge-green">Unit 1 Lecture Notes</span>
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <span class="format-pill active" style="font-size: 0.78rem;">13-Mark Format</span>
+          <span class="format-pill" style="font-size: 0.78rem;">Tanglish</span>
+        </div>
+      </div>
+
+      <!-- Preview Chat Stream -->
+      <div style="display: flex; flex-direction: column; gap: 18px;">
+        
+        <!-- User Query Bubble -->
+        <div class="message-row user" style="align-self: flex-end;">
+          <div class="message-bubble" style="background: linear-gradient(135deg, rgba(168, 85, 247, 0.35), rgba(99, 102, 241, 0.3));">
+            Explain Convolutional Neural Networks (CNN) architecture with working principles and pooling layers.
+          </div>
+        </div>
+
+        <!-- AI Response Bubble -->
+        <div class="message-row ai" style="align-self: flex-start;">
+          <div class="message-avatar ai-avatar-badge">✦</div>
+          <div class="message-bubble">
+            <h3 style="color: #c4b5fd; margin-top: 0;">Convolutional Neural Networks (CNN) — 13-Mark Structured Answer</h3>
+            <p style="font-size: 0.92rem; margin: 8px 0;">
+              A <strong>Convolutional Neural Network (CNN)</strong> is a specialized deep learning architecture optimized for processing spatial grid data like images and feature maps.
+            </p>
+            <ul style="font-size: 0.9rem; margin: 8px 0; padding-left: 20px;">
+              <li><strong>Convolution Layer:</strong> Applies learnable kernels to extract local spatial features (edges, textures).</li>
+              <li><strong>Activation (ReLU):</strong> Introduces non-linearity: <code>f(x) = max(0, x)</code>.</li>
+              <li><strong>Pooling Layer:</strong> Downsamples feature maps (Max Pooling / Average Pooling) reducing spatial dimensions.</li>
+              <li><strong>Fully Connected Layer:</strong> Aggregates high-level representations for final classification.</li>
+            </ul>
+
+            <div class="citations-wrapper" style="margin-top: 14px;">
+              <div class="citations-header">📚 Verified Course Citation:</div>
+              <div class="citations-grid">
+                <a href="{{ url_for('chat_routes.chat_view') }}" class="citation-card">
+                  <span>📄 AI & Deep Learning Unit 1 Notes.pdf</span>
+                  <span class="citation-page-badge">Page 14</span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- CTA to Chat -->
+      <div style="text-align: center; margin-top: 24px;">
+        <a href="{{ url_for('chat_routes.chat_view') }}" class="glass-btn glass-btn-primary">
+          Open Full Chat Interface & Ask Questions →
+        </a>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS SECTION -->
+  <section style="margin-bottom: 80px;">
+    <div style="text-align: center; margin-bottom: 40px;">
+      <span class="glass-badge glass-badge-green">SEAMLESS WORKFLOW</span>
+      <h2 style="font-size: 2.2rem; font-weight: 800; margin-top: 12px; margin-bottom: 8px;">
+        How Padika AI Powers Academic Excellence
+      </h2>
+      <p style="color: var(--text-muted); max-width: 600px; margin: 0 auto;">
+        From professor uploads to instant multi-lingual exam preparation in four simple steps.
+      </p>
+    </div>
+
+    <div class="grid-cols-4">
+      
+      <div class="glass-card">
+        <div style="font-size: 2rem; font-weight: 900; color: #a855f7; margin-bottom: 10px;">01</div>
+        <h4 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 8px;">Faculty Uploads</h4>
+        <p style="font-size: 0.88rem; color: var(--text-muted);">
+          Professors upload textbooks, lecture notes, question banks, or PPTs targeting specific departments and semesters.
+        </p>
+      </div>
+
+      <div class="glass-card">
+        <div style="font-size: 2rem; font-weight: 900; color: #38bdf8; margin-bottom: 10px;">02</div>
+        <h4 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 8px;">PyMuPDF & Vector Index</h4>
+        <p style="font-size: 0.88rem; color: var(--text-muted);">
+          Text is extracted page-by-page, chunked with semantic overlap, and embedded into multilingual vector space.
+        </p>
+      </div>
+
+      <div class="glass-card">
+        <div style="font-size: 2rem; font-weight: 900; color: #ec4899; margin-bottom: 10px;">03</div>
+        <h4 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 8px;">Student Ask AI</h4>
+        <p style="font-size: 0.88rem; color: var(--text-muted);">
+          Students ask subject or document-scoped questions in English, Tamil, or Tanglish choosing desired exam marks.
+        </p>
+      </div>
+
+      <div class="glass-card">
+        <div style="font-size: 2rem; font-weight: 900; color: #10b981; margin-bottom: 10px;">04</div>
+        <h4 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 8px;">Grounded Citations</h4>
+        <p style="font-size: 0.88rem; color: var(--text-muted);">
+          Padika AI synthesizes accurate answers grounded strictly in the uploaded material with clickable page citations.
+        </p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- STUDENT & FACULTY BENEFITS -->
+  <section style="margin-bottom: 80px;">
+    <div class="grid-cols-2">
+      
+      <!-- Student Card -->
+      <div class="glass-panel" style="padding: 32px; border-color: rgba(56, 189, 248, 0.3);">
+        <span class="glass-badge glass-badge-blue" style="margin-bottom: 16px;">FOR STUDENTS</span>
+        <h3 style="font-size: 1.6rem; font-weight: 800; margin-bottom: 16px; color: #fff;">
+          Master Every Semester with Confidence
+        </h3>
+        <ul style="list-style: none; display: flex; flex-direction: column; gap: 12px; font-size: 0.95rem; color: var(--text-muted); padding: 0;">
+          <li style="display: flex; align-items: center; gap: 10px;">
+            <span style="color: #38bdf8; font-weight: bold;">✓</span> Access all course notes organized by your department & semester
+          </li>
+          <li style="display: flex; align-items: center; gap: 10px;">
+            <span style="color: #38bdf8; font-weight: bold;">✓</span> Generate high-scoring 2-mark, 13-mark, and 16-mark answers on demand
+          </li>
+          <li style="display: flex; align-items: center; gap: 10px;">
+            <span style="color: #38bdf8; font-weight: bold;">✓</span> Clarify complex engineering concepts in Tamil or Tanglish
+          </li>
+          <li style="display: flex; align-items: center; gap: 10px;">
+            <span style="color: #38bdf8; font-weight: bold;">✓</span> Embedded Glassmorphism PDF reader with side-by-side AI assistant
+          </li>
+        </ul>
+        <div style="margin-top: 24px;">
+          <a href="{{ url_for('auth_routes.register_student') }}" class="glass-btn glass-btn-secondary">
+            Register Student Portal →
+          </a>
+        </div>
+      </div>
+
+      <!-- Faculty Card -->
+      <div class="glass-panel" style="padding: 32px; border-color: rgba(168, 85, 247, 0.3);">
+        <span class="glass-badge glass-badge-purple" style="margin-bottom: 16px;">FOR PROFESSORS & FACULTY</span>
+        <h3 style="font-size: 1.6rem; font-weight: 800; margin-bottom: 16px; color: #fff;">
+          Distribute, Manage & Monitor Materials
+        </h3>
+        <ul style="list-style: none; display: flex; flex-direction: column; gap: 12px; font-size: 0.95rem; color: var(--text-muted); padding: 0;">
+          <li style="display: flex; align-items: center; gap: 10px;">
+            <span style="color: #a855f7; font-weight: bold;">✓</span> One-click multi-page PDF indexing into college vector database
+          </li>
+          <li style="display: flex; align-items: center; gap: 10px;">
+            <span style="color: #a855f7; font-weight: bold;">✓</span> Control target audience by department, semester, and subject code
+          </li>
+          <li style="display: flex; align-items: center; gap: 10px;">
+            <span style="color: #a855f7; font-weight: bold;">✓</span> Ensure students receive AI tutoring grounded directly in your syllabus
+          </li>
+          <li style="display: flex; align-items: center; gap: 10px;">
+            <span style="color: #a855f7; font-weight: bold;">✓</span> Track material views, student interactions, and study statistics
+          </li>
+        </ul>
+        <div style="margin-top: 24px;">
+          <a href="{{ url_for('auth_routes.register_faculty') }}" class="glass-btn glass-btn-primary">
+            Register Faculty Portal →
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- CALL TO ACTION BANNER -->
+  <section>
+    <div class="glass-panel" style="padding: 48px 32px; text-align: center; background: radial-gradient(circle at 50% 50%, rgba(138, 43, 226, 0.25) 0%, rgba(22, 16, 48, 0.7) 100%); border-color: var(--glass-border-glow);">
+      <h2 style="font-size: 2.2rem; font-weight: 800; margin-bottom: 14px;">
+        Ready to Transform College Learning?
+      </h2>
+      <p style="color: var(--text-muted); max-width: 580px; margin: 0 auto 30px;">
+        Experience seamless academic excellence with pure Glassmorphism beauty and grounded AI intelligence.
+      </p>
+      <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
+        <a href="{{ url_for('auth_routes.register_student') }}" class="glass-btn glass-btn-lg glass-btn-primary">
+          Join Padika AI Now
+        </a>
+        <a href="{{ url_for('auth_routes.login') }}" class="glass-btn glass-btn-lg">
+          Sign In with Existing Account
+        </a>
+      </div>
+    </div>
+  </section>
+
+</div>
+{% endblock %}
+

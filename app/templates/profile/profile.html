@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block title %}Profile & Settings — Padika AI{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 900px; padding-top: 30px; padding-bottom: 60px;">
+  
+  <div style="margin-bottom: 28px;">
+    <h1 style="font-size: 2rem; font-weight: 800; color: #fff;">Account Profile & Settings</h1>
+    <p style="color: var(--text-muted); font-size: 0.95rem;">Manage your academic details, department affiliation, and preferences</p>
+  </div>
+
+  <div class="grid-cols-3">
+    
+    <!-- User Card -->
+    <div class="glass-panel" style="padding: 28px; text-align: center; height: fit-content;">
+      <div class="user-avatar" style="width: 80px; height: 80px; font-size: 2.2rem; margin: 0 auto 16px; background-color: {{ user.avatar_color }};">
+        {{ user.full_name[:1]|upper }}
+      </div>
+
+      <h2 style="font-size: 1.3rem; font-weight: 700; color: #fff; margin-bottom: 4px;">
+        {{ user.full_name }}
+      </h2>
+      <p style="color: var(--text-dim); font-size: 0.85rem; margin-bottom: 12px;">{{ user.email }}</p>
+
+      <div style="margin-bottom: 20px;">
+        {% if user.role == 'student' %}
+          <span class="glass-badge glass-badge-blue">Student</span>
+        {% elif user.role == 'faculty' %}
+          <span class="glass-badge glass-badge-purple">Faculty Professor</span>
+        {% else %}
+          <span class="glass-badge glass-badge-pink">Campus Administrator</span>
+        {% endif %}
+      </div>
+
+      <div style="border-top: 1px solid rgba(255, 255, 255, 0.08); padding-top: 16px; text-align: left; font-size: 0.85rem; display: flex; flex-direction: column; gap: 8px;">
+        <div>
+          <span style="color: var(--text-dim);">Department:</span>
+          <span style="color: #fff; font-weight: 600; margin-left: 6px;">{{ department.name if department else 'Not assigned' }}</span>
+        </div>
+        {% if user.role == 'student' %}
+          <div>
+            <span style="color: var(--text-dim);">Current Semester:</span>
+            <span style="color: #fff; font-weight: 600; margin-left: 6px;">{{ semester.name if semester else 'Not assigned' }}</span>
+          </div>
+          <div>
+            <span style="color: var(--text-dim);">Roll Number:</span>
+            <span style="color: #38bdf8; font-weight: 600; margin-left: 6px;">{{ user.roll_number or '—' }}</span>
+          </div>
+        {% elif user.role == 'faculty' %}
+          <div>
+            <span style="color: var(--text-dim);">Employee ID:</span>
+            <span style="color: #a855f7; font-weight: 600; margin-left: 6px;">{{ user.employee_id or '—' }}</span>
+          </div>
+        {% endif %}
+        <div>
+          <span style="color: var(--text-dim);">Member Since:</span>
+          <span style="color: #fff; margin-left: 6px;">{{ user.created_at|datetimeformat }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Edit Profile Form -->
+    <div class="glass-panel" style="grid-column: span 2; padding: 32px;">
+      <h3 style="font-size: 1.25rem; font-weight: 700; color: #fff; margin-bottom: 20px;">
+        Update Profile Information
+      </h3>
+
+      <form method="POST" action="{{ url_for('profile_routes.profile') }}">
+        
+        <div class="glass-form-group">
+          <label class="glass-label" for="full_name">Full Name</label>
+          <input type="text" id="full_name" name="full_name" class="glass-input" value="{{ user.full_name }}" required>
+        </div>
+
+        <div class="glass-form-group">
+          <label class="glass-label" for="bio">Academic Bio / Study Interests</label>
+          <textarea id="bio" name="bio" class="glass-textarea" rows="3" placeholder="e.g. 3rd year CSE student interested in Deep Learning, NLP, and Cloud Architectures...">{{ user.bio or '' }}</textarea>
+        </div>
+
+        {% if user.role == 'student' %}
+          <div class="grid-cols-2">
+            <div class="glass-form-group">
+              <label class="glass-label" for="department_id">Department</label>
+              <select id="department_id" name="department_id" class="glass-select">
+                {% for d in departments %}
+                  <option value="{{ d.id }}" {% if user.department_id == d.id %}selected{% endif %}>
+                    {{ d.code }} — {{ d.name }}
+                  </option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div class="glass-form-group">
+              <label class="glass-label" for="semester_id">Current Semester</label>
+              <select id="semester_id" name="semester_id" class="glass-select">
+                {% for s in semesters %}
+                  <option value="{{ s.id }}" {% if user.semester_id == s.id %}selected{% endif %}>
+                    Semester {{ s.number }}
+                  </option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+        {% endif %}
+
+        <div style="margin-top: 24px;">
+          <button type="submit" class="glass-btn glass-btn-primary">
+            Save Profile Changes
+          </button>
+        </div>
+
+      </form>
+    </div>
+
+  </div>
+
+</div>
+{% endblock %}
+

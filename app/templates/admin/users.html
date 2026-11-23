@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+
+{% block title %}User Management — Padika AI Admin{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 30px; padding-bottom: 60px;">
+  
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px; flex-wrap: wrap; gap: 16px;">
+    <div>
+      <h1 style="font-size: 2rem; font-weight: 800; color: #fff;">User & Account Management</h1>
+      <p style="color: var(--text-muted); font-size: 0.95rem;">Audit student enrollments, faculty credentials, and account statuses</p>
+    </div>
+
+    <a href="{{ url_for('admin.dashboard') }}" class="glass-btn glass-btn-secondary">
+      ← Admin Console
+    </a>
+  </div>
+
+  <!-- SEARCH & FILTER BAR -->
+  <div class="glass-panel" style="padding: 20px 24px; margin-bottom: 30px;">
+    <form method="GET" action="{{ url_for('admin.users') }}" style="display: flex; gap: 14px; flex-wrap: wrap; align-items: center;">
+      
+      <div style="flex: 2; min-width: 260px;">
+        <input type="text" name="search" class="glass-input" placeholder="Search by name, email, roll number, or employee ID..." value="{{ search or '' }}">
+      </div>
+
+      <div style="flex: 1; min-width: 180px;">
+        <select name="role" class="glass-select">
+          <option value="">All Account Roles</option>
+          <option value="student" {% if role_filter == 'student' %}selected{% endif %}>Students Only</option>
+          <option value="faculty" {% if role_filter == 'faculty' %}selected{% endif %}>Faculty Only</option>
+          <option value="admin" {% if role_filter == 'admin' %}selected{% endif %}>Administrators Only</option>
+        </select>
+      </div>
+
+      <button type="submit" class="glass-btn glass-btn-primary">
+        Apply Filter
+      </button>
+
+      {% if search or role_filter %}
+        <a href="{{ url_for('admin.users') }}" class="glass-btn">
+          Clear
+        </a>
+      {% endif %}
+
+    </form>
+  </div>
+
+  <!-- USERS TABLE -->
+  <div class="glass-panel" style="padding: 24px;">
+    <div class="glass-table-container">
+      <table class="glass-table">
+        <thead>
+          <tr>
+            <th>User & Email</th>
+            <th>Role</th>
+            <th>Department & Semester</th>
+            <th>Identifier</th>
+            <th>Registration Date</th>
+            <th>Status</th>
+            <th>Control</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for u in users %}
+            <tr>
+              <td>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <div class="user-avatar" style="background-color: {{ u.avatar_color }}; width: 32px; height: 32px; font-size: 0.85rem;">
+                    {{ u.full_name[:1]|upper }}
+                  </div>
+                  <div>
+                    <div style="font-weight: 700; color: #fff;">{{ u.full_name }}</div>
+                    <div style="font-size: 0.8rem; color: var(--text-dim);">{{ u.email }}</div>
+                  </div>
+                </div>
+              </td>
+
+              <td>
+                {% if u.role == 'student' %}
+                  <span class="glass-badge glass-badge-blue">Student</span>
+                {% elif u.role == 'faculty' %}
+                  <span class="glass-badge glass-badge-purple">Faculty</span>
+                {% else %}
+                  <span class="glass-badge glass-badge-pink">Admin</span>
+                {% endif %}
+              </td>
+
+              <td>
+                <div>{{ u.department_name or '—' }}</div>
+                <div style="font-size: 0.8rem; color: var(--text-dim);">
+                  {{ u.semester_name or '' }}
+                </div>
+              </td>
+
+              <td>
+                <span style="font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; color: #38bdf8;">
+                  {{ u.roll_number or u.employee_id or '—' }}
+                </span>
+              </td>
+
+              <td style="font-size: 0.85rem; color: var(--text-dim);">
+                {{ u.created_at|datetimeformat }}
+              </td>
+
+              <td>
+                {% if u.is_active %}
+                  <span class="glass-badge glass-badge-green">Active</span>
+                {% else %}
+                  <span class="glass-badge glass-badge-danger">Suspended</span>
+                {% endif %}
+              </td>
+
+              <td>
+                <form method="POST" action="{{ url_for('admin.toggle_user_status', user_id=u.id) }}">
+                  {% if u.is_active %}
+                    <button type="submit" class="glass-btn glass-btn-sm glass-btn-danger" title="Deactivate user account">
+                      Deactivate
+                    </button>
+                  {% else %}
+                    <button type="submit" class="glass-btn glass-btn-sm glass-btn-primary" title="Activate user account">
+                      Activate
+                    </button>
+                  {% endif %}
+                </form>
+              </td>
+            </tr>
+          {% else %}
+            <tr>
+              <td colspan="7" style="text-align: center; padding: 40px; color: var(--text-muted);">
+                No users match the specified search or filter criteria.
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+

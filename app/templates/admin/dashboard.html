@@ -1,0 +1,165 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard — Padika AI Control Center{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 30px; padding-bottom: 60px;">
+  
+  <!-- ADMIN HEADER -->
+  <div class="glass-panel" style="padding: 28px 32px; margin-bottom: 32px; border-color: rgba(236, 72, 153, 0.4);">
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;">
+      <div>
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+          <span class="glass-badge glass-badge-pink">CAMPUS ADMINISTRATOR</span>
+          <span class="glass-badge glass-badge-green">System Healthy</span>
+        </div>
+        <h1 style="font-size: 2rem; font-weight: 800; margin: 0; color: #fff;">
+          Campus Administrative Console
+        </h1>
+        <p style="color: var(--text-muted); font-size: 0.95rem; margin-top: 6px;">
+          College-wide overview: accounts, departments, semester curricula, faculty assignments, and vector database status.
+        </p>
+      </div>
+
+      <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+        <a href="{{ url_for('admin.users') }}" class="glass-btn glass-btn-primary">
+          👥 Manage Users
+        </a>
+        <a href="{{ url_for('admin.curriculum') }}" class="glass-btn glass-btn-secondary">
+          🏛️ Curriculum & Departments
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- PLATFORM STATS -->
+  <div class="grid-cols-4" style="margin-bottom: 36px;">
+    
+    <div class="glass-card stat-card">
+      <div class="stat-icon" style="background: rgba(56, 189, 248, 0.2); color: #38bdf8;">👨‍🎓</div>
+      <div>
+        <div class="stat-value">{{ stats.student_count }}</div>
+        <div class="stat-label">Active Students</div>
+      </div>
+    </div>
+
+    <div class="glass-card stat-card">
+      <div class="stat-icon" style="background: rgba(168, 85, 247, 0.2); color: #c4b5fd;">👩‍🏫</div>
+      <div>
+        <div class="stat-value">{{ stats.faculty_count }}</div>
+        <div class="stat-label">Faculty Accounts</div>
+      </div>
+    </div>
+
+    <div class="glass-card stat-card">
+      <div class="stat-icon" style="background: rgba(236, 72, 153, 0.2); color: #f472b6;">📄</div>
+      <div>
+        <div class="stat-value">{{ stats.material_count }}</div>
+        <div class="stat-label">Indexed Documents</div>
+      </div>
+    </div>
+
+    <div class="glass-card stat-card">
+      <div class="stat-icon" style="background: rgba(16, 185, 129, 0.2); color: #10b981;">💬</div>
+      <div>
+        <div class="stat-value">{{ stats.ai_query_count }}</div>
+        <div class="stat-label">AI RAG Invocations</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- RECENT REGISTRATIONS AND MATERIALS -->
+  <div class="grid-cols-2">
+    
+    <!-- Recent Users -->
+    <div class="glass-panel" style="padding: 24px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <h3 style="font-size: 1.2rem; font-weight: 700; color: #fff;">Recent User Accounts</h3>
+        <a href="{{ url_for('admin.users') }}" style="color: #38bdf8; font-size: 0.85rem; font-weight: 600; text-decoration: none;">View All →</a>
+      </div>
+
+      <div class="glass-table-container">
+        <table class="glass-table">
+          <thead>
+            <tr>
+              <th>User</th>
+              <th>Role</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for u in recent_users %}
+              <tr>
+                <td>
+                  <div style="font-weight: 600; color: #fff;">{{ u.full_name }}</div>
+                  <div style="font-size: 0.8rem; color: var(--text-dim);">{{ u.email }}</div>
+                </td>
+                <td>
+                  {% if u.role == 'student' %}
+                    <span class="glass-badge glass-badge-blue">Student</span>
+                  {% elif u.role == 'faculty' %}
+                    <span class="glass-badge glass-badge-purple">Faculty</span>
+                  {% else %}
+                    <span class="glass-badge glass-badge-pink">Admin</span>
+                  {% endif %}
+                </td>
+                <td>
+                  {% if u.is_active %}
+                    <span style="color: #10b981; font-size: 0.82rem; font-weight: 700;">● Active</span>
+                  {% else %}
+                    <span style="color: #f43f5e; font-size: 0.82rem; font-weight: 700;">● Inactive</span>
+                  {% endif %}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Recent Materials -->
+    <div class="glass-panel" style="padding: 24px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <h3 style="font-size: 1.2rem; font-weight: 700; color: #fff;">Curriculum Materials Stream</h3>
+        <a href="{{ url_for('materials_routes.library') }}" style="color: #a855f7; font-size: 0.85rem; font-weight: 600; text-decoration: none;">Library →</a>
+      </div>
+
+      <div class="glass-table-container">
+        <table class="glass-table">
+          <thead>
+            <tr>
+              <th>Document</th>
+              <th>Subject</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for m in recent_materials %}
+              <tr>
+                <td>
+                  <div style="font-weight: 600; color: #fff;">{{ m.title }}</div>
+                  <div style="font-size: 0.8rem; color: var(--text-dim);">{{ m.faculty_name }}</div>
+                </td>
+                <td>
+                  <span class="glass-badge glass-badge-purple">{{ m.subject_code }}</span>
+                </td>
+                <td>
+                  {% if m.status == 'Completed' %}
+                    <span class="glass-badge glass-badge-green">Ready</span>
+                  {% else %}
+                    <span class="glass-badge glass-badge-amber">{{ m.status }}</span>
+                  {% endif %}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+{% endblock %}
+

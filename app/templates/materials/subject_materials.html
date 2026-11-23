@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block title %}{{ subject.code }} — {{ subject.name }} Notes — Padika AI{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 30px; padding-bottom: 60px;">
+  
+  <!-- SUBJECT HERO BANNER -->
+  <div class="glass-panel" style="padding: 32px; margin-bottom: 32px; border-color: rgba(99, 102, 241, 0.4);">
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;">
+      <div>
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+          <span class="glass-badge glass-badge-purple">{{ subject.code }}</span>
+          <span class="glass-badge glass-badge-blue">{{ subject.department_code }}</span>
+          <span class="glass-badge glass-badge-green">Semester {{ subject.semester_number }}</span>
+          <span style="font-size: 0.85rem; color: var(--text-dim);">{{ subject.credits }} Credits</span>
+        </div>
+
+        <h1 style="font-size: 2.2rem; font-weight: 800; color: #fff; margin-bottom: 8px;">
+          {{ subject.name }}
+        </h1>
+
+        <p style="color: var(--text-muted); font-size: 0.95rem; max-width: 650px;">
+          {{ subject.description or 'Official course materials uploaded and verified by faculty professors.' }}
+        </p>
+      </div>
+
+      <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+        <a href="{{ url_for('chat_routes.chat_view', subject_id=subject.id) }}" class="glass-btn glass-btn-primary">
+          ✦ Ask AI about {{ subject.code }}
+        </a>
+        <a href="{{ url_for('materials_routes.library') }}" class="glass-btn glass-btn-secondary">
+          ← All Materials
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- MATERIALS FOR THIS SUBJECT -->
+  <div style="margin-bottom: 24px;">
+    <h2 style="font-size: 1.4rem; font-weight: 700; color: #fff;">
+      Uploaded Documents ({{ materials|length }})
+    </h2>
+  </div>
+
+  <div class="grid-cols-3">
+    {% for mat in materials %}
+      <div class="glass-card" style="display: flex; flex-direction: column; justify-content: space-between;">
+        <div>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <span class="glass-badge glass-badge-blue">{{ mat.category }}</span>
+            <span style="font-size: 0.8rem; color: var(--text-dim);">
+              {{ mat.page_count }} Pages
+            </span>
+          </div>
+
+          <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 6px; color: #fff;">
+            {{ mat.title }}
+          </h3>
+
+          <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 16px; line-height: 1.5;">
+            {{ mat.description or 'Academic syllabus material ready for study and AI queries.' }}
+          </p>
+
+          <div style="font-size: 0.8rem; color: var(--text-dim); margin-bottom: 16px;">
+            Faculty: <strong>{{ mat.faculty_name }}</strong> • {{ mat.file_size|filesizeformat }}
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 8px; align-items: center; padding-top: 14px; border-top: 1px solid rgba(255, 255, 255, 0.08);">
+          <a href="{{ url_for('materials_routes.view_pdf', material_id=mat.id) }}" class="glass-btn glass-btn-sm glass-btn-secondary" style="flex: 1;">
+            📖 Read
+          </a>
+          <a href="{{ url_for('chat_routes.chat_view', material_id=mat.id, subject_id=subject.id) }}" class="glass-btn glass-btn-sm glass-btn-primary" style="flex: 1;">
+            ✦ Ask AI
+          </a>
+          <button class="glass-btn glass-btn-sm bookmark-toggle-btn {% if mat.id in user_bookmarks %}active{% endif %}" data-material-id="{{ mat.id }}" title="Bookmark">
+            <span class="bookmark-icon">{% if mat.id in user_bookmarks %}★{% else %}☆{% endif %}</span>
+          </button>
+        </div>
+      </div>
+    {% else %}
+      <div class="glass-card" style="grid-column: 1 / -1; text-align: center; padding: 50px;">
+        <h3 style="color: #fff; margin-bottom: 8px;">No materials uploaded yet for {{ subject.code }}</h3>
+        <p style="color: var(--text-muted);">Your professors will upload notes and question banks for this course soon.</p>
+      </div>
+    {% endfor %}
+  </div>
+
+</div>
+{% endblock %}
+

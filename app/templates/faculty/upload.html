@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+
+{% block title %}Upload Course Material — Padika AI{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 800px; padding-top: 30px; padding-bottom: 60px;">
+  
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+    <div>
+      <h1 style="font-size: 2rem; font-weight: 800; color: #fff;">Upload Curriculum Material</h1>
+      <p style="color: var(--text-muted); font-size: 0.95rem;">
+        PDF documents will be automatically parsed with PyMuPDF, indexed into vector embeddings, and made queryable by students.
+      </p>
+    </div>
+    <a href="{{ url_for('faculty.dashboard') }}" class="glass-btn glass-btn-secondary">
+      ← Back to Dashboard
+    </a>
+  </div>
+
+  <div class="glass-panel" style="padding: 36px; border-color: rgba(168, 85, 247, 0.4);">
+    <form method="POST" action="{{ url_for('faculty.upload') }}" enctype="multipart/form-data" id="uploadForm">
+      
+      <div class="glass-form-group">
+        <label class="glass-label" for="title">Material Title *</label>
+        <input type="text" id="title" name="title" class="glass-input" placeholder="e.g. Unit 1: Introduction to Machine Learning & Neural Networks" required>
+      </div>
+
+      <div class="grid-cols-2">
+        <div class="glass-form-group">
+          <label class="glass-label" for="category">Document Category *</label>
+          <select id="category" name="category" class="glass-select" required>
+            <option value="Notes">Lecture Notes</option>
+            <option value="Book">Textbook / Reference Book</option>
+            <option value="Question Bank">Question Bank / 2-Mark & 16-Mark</option>
+            <option value="PPT">Presentation Slides / PPT</option>
+            <option value="Syllabus">Curriculum / Syllabus</option>
+          </select>
+        </div>
+
+        <div class="glass-form-group">
+          <label class="glass-label" for="subject_id">Target Subject *</label>
+          <select id="subject_id" name="subject_id" class="glass-select" required>
+            <option value="">Select Subject</option>
+            {% for s in subjects %}
+              <option value="{{ s.id }}">
+                {{ s.code }} — {{ s.name }} (Sem {{ s.semester_number }})
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+
+      <div class="grid-cols-2">
+        <div class="glass-form-group">
+          <label class="glass-label" for="department_id">Department *</label>
+          <select id="department_id" name="department_id" class="glass-select" required>
+            {% for d in departments %}
+              <option value="{{ d.id }}" {% if user.department_id == d.id %}selected{% endif %}>
+                {{ d.code }} — {{ d.name }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="glass-form-group">
+          <label class="glass-label" for="semester_id">Target Semester *</label>
+          <select id="semester_id" name="semester_id" class="glass-select" required>
+            {% for sem in semesters %}
+              <option value="{{ sem.id }}">Semester {{ sem.number }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+
+      <div class="glass-form-group">
+        <label class="glass-label" for="description">Summary / Overview</label>
+        <textarea id="description" name="description" class="glass-textarea" rows="3" placeholder="Brief outline of topics covered in this document..."></textarea>
+      </div>
+
+      <!-- Drag & Drop Glass Upload Box -->
+      <div class="glass-form-group">
+        <label class="glass-label">Course PDF File *</label>
+        <div id="dropZone" style="border: 2px dashed rgba(168, 85, 247, 0.4); border-radius: 16px; padding: 36px 20px; text-align: center; background: rgba(255, 255, 255, 0.02); cursor: pointer; transition: var(--transition-normal);">
+          <div style="font-size: 2.8rem; margin-bottom: 8px; color: #a855f7;">📄</div>
+          <div style="font-weight: 700; color: #fff; margin-bottom: 4px;" id="dropFileName">
+            Click to browse or drag & drop PDF file here
+          </div>
+          <div style="font-size: 0.85rem; color: var(--text-dim);">
+            Supports text-based PDF documents up to 64MB.
+          </div>
+          <input type="file" id="file" name="file" accept=".pdf" required style="display: none;">
+        </div>
+      </div>
+
+      <!-- Submit Button with Processing State -->
+      <div style="margin-top: 24px;">
+        <button type="submit" id="submitBtn" class="glass-btn glass-btn-primary" style="width: 100%; padding: 14px; font-size: 1.05rem;">
+          🚀 Upload & Generate Multilingual AI Vector Index
+        </button>
+      </div>
+
+      <div id="processingIndicator" style="display: none; text-align: center; margin-top: 18px; padding: 14px; background: rgba(168, 85, 247, 0.15); border: 1px solid rgba(168, 85, 247, 0.3); border-radius: 12px;">
+        <div class="typing-dots" style="justify-content: center;">
+          <div class="typing-dot"></div>
+          <div class="typing-dot"></div>
+          <div class="typing-dot"></div>
+        </div>
+        <div style="font-size: 0.9rem; color: #e9d5ff; margin-top: 6px;">
+          Extracting text with PyMuPDF, generating sentence embeddings, and building vector index...
+        </div>
+      </div>
+
+    </form>
+  </div>
+
+</div>
+
+<script>
+const dropZone = document.getElementById('dropZone');
+const fileInput = document.getElementById('file');
+const fileNameDisplay = document.getElementById('dropFileName');
+const uploadForm = document.getElementById('uploadForm');
+const submitBtn = document.getElementById('submitBtn');
+const processingIndicator = document.getElementById('processingIndicator');
+
+dropZone.addEventListener('click', () => fileInput.click());
+
+fileInput.addEventListener('change', () => {
+  if (fileInput.files.length > 0) {
+    fileNameDisplay.innerHTML = `<span style="color: #38bdf8;">✓ Selected: ${fileInput.files[0].name} (${(fileInput.files[0].size / 1024 / 1024).toFixed(2)} MB)</span>`;
+    dropZone.style.borderColor = 'rgba(56, 189, 248, 0.8)';
+  }
+});
+
+dropZone.addEventListener('dragover', (e) => {
+  e.preventDefault();
+  dropZone.style.borderColor = '#a855f7';
+  dropZone.style.background = 'rgba(168, 85, 247, 0.08)';
+});
+
+dropZone.addEventListener('dragleave', () => {
+  dropZone.style.borderColor = 'rgba(168, 85, 247, 0.4)';
+  dropZone.style.background = 'rgba(255, 255, 255, 0.02)';
+});
+
+dropZone.addEventListener('drop', (e) => {
+  e.preventDefault();
+  dropZone.style.borderColor = 'rgba(56, 189, 248, 0.8)';
+  if (e.dataTransfer.files.length > 0) {
+    fileInput.files = e.dataTransfer.files;
+    fileNameDisplay.innerHTML = `<span style="color: #38bdf8;">✓ Selected: ${fileInput.files[0].name}</span>`;
+  }
+});
+
+uploadForm.addEventListener('submit', () => {
+  submitBtn.disabled = true;
+  submitBtn.style.opacity = '0.6';
+  processingIndicator.style.display = 'block';
+});
+</script>
+{% endblock %}
+

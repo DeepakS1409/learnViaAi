@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+
+{% block title %}About Padika AI — Architecture & Vision{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 1000px; padding-top: 40px; padding-bottom: 60px;">
+  
+  <div style="text-align: center; margin-bottom: 50px;">
+    <span class="glass-badge glass-badge-purple">ABOUT THE PLATFORM</span>
+    <h1 style="font-size: 2.8rem; font-weight: 800; margin-top: 14px; margin-bottom: 12px;">
+      Empowering Higher Education with Grounded AI
+    </h1>
+    <p style="color: var(--text-muted); font-size: 1.1rem; max-width: 700px; margin: 0 auto;">
+      Padika AI bridges the gap between official college curriculum and autonomous student self-study through accurate Retrieval-Augmented Generation (RAG).
+    </p>
+  </div>
+
+  <!-- MISSION & PHILOSOPHY -->
+  <div class="glass-panel" style="padding: 36px; margin-bottom: 40px;">
+    <h2 style="font-size: 1.6rem; font-weight: 700; color: #fff; margin-bottom: 16px;">
+      ✦ Our Mission: Anti-Hallucination Academic Tutoring
+    </h2>
+    <p style="color: var(--text-muted); margin-bottom: 16px; font-size: 1rem; line-height: 1.7;">
+      Standard public AI models often invent answers or draw from conflicting international syllabi. 
+      <strong>Padika AI is fundamentally different:</strong> every question asked by a student is vector-searched against the exact documents uploaded by their designated course professor.
+    </p>
+    <p style="color: var(--text-muted); font-size: 1rem; line-height: 1.7;">
+      If a topic is not in the professor's notes, Padika AI explicitly alerts the student rather than guessing. 
+      Furthermore, it offers multilingual support in <strong>English, தமிழ், and colloquial Tanglish</strong>, ensuring no language barrier stands between students and exam success.
+    </p>
+  </div>
+
+  <!-- TECHNOLOGY STACK OVERVIEW -->
+  <div style="margin-bottom: 50px;">
+    <h2 style="font-size: 1.8rem; font-weight: 800; text-align: center; margin-bottom: 30px;">
+      Enterprise-Grade Academic Tech Stack
+    </h2>
+
+    <div class="grid-cols-3">
+      
+      <div class="glass-card">
+        <div class="stat-icon" style="background: rgba(168, 85, 247, 0.2); margin-bottom: 16px; color: #c4b5fd;">⚡</div>
+        <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 8px;">Python Flask & SQLite</h3>
+        <p style="font-size: 0.88rem; color: var(--text-muted);">
+          Lightweight, performant backend with clean relational models designed for effortless migration to PostgreSQL.
+        </p>
+      </div>
+
+      <div class="glass-card">
+        <div class="stat-icon" style="background: rgba(56, 189, 248, 0.2); margin-bottom: 16px; color: #7dd3fc;">📄</div>
+        <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 8px;">PyMuPDF (fitz)</h3>
+        <p style="font-size: 0.88rem; color: var(--text-muted);">
+          High-fidelity PDF document parser that extracts content page-by-page to guarantee 100% accurate page citations.
+        </p>
+      </div>
+
+      <div class="glass-card">
+        <div class="stat-icon" style="background: rgba(236, 72, 153, 0.2); margin-bottom: 16px; color: #f472b6;">🧠</div>
+        <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 8px;">Multilingual Embeddings</h3>
+        <p style="font-size: 0.88rem; color: var(--text-muted);">
+          Cross-lingual dense vectorization supporting English, Tamil Unicode, and Romanized Tanglish subwords.
+        </p>
+      </div>
+
+      <div class="glass-card">
+        <div class="stat-icon" style="background: rgba(16, 185, 129, 0.2); margin-bottom: 16px; color: #a7f3d0;">🔍</div>
+        <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 8px;">Cosine Vector Search</h3>
+        <p style="font-size: 0.88rem; color: var(--text-muted);">
+          Fast nearest-neighbor semantic search scoped strictly by student's department, semester, and subject code.
+        </p>
+      </div>
+
+      <div class="glass-card">
+        <div class="stat-icon" style="background: rgba(245, 158, 11, 0.2); margin-bottom: 16px; color: #fde68a;">🤖</div>
+        <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 8px;">Gemini RAG Engine</h3>
+        <p style="font-size: 0.88rem; color: var(--text-muted);">
+          State-of-the-art context processing delivering 2-mark definitions, 13-mark answers, and 16-mark structured guides.
+        </p>
+      </div>
+
+      <div class="glass-card">
+        <div class="stat-icon" style="background: rgba(147, 51, 234, 0.2); margin-bottom: 16px; color: #e9d5ff;">🎨</div>
+        <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 8px;">Pure Glassmorphism UI</h3>
+        <p style="font-size: 0.88rem; color: var(--text-muted);">
+          Deep violet-purple gradients, ambient frosted cards with backdrop filters, and high-contrast typography.
+        </p>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ROLE PERMISSIONS MATRIX -->
+  <div class="glass-panel" style="padding: 32px;">
+    <h3 style="font-size: 1.3rem; font-weight: 700; margin-bottom: 16px; color: #fff;">
+      Strict Backend Access Security
+    </h3>
+    <div class="glass-table-container">
+      <table class="glass-table">
+        <thead>
+          <tr>
+            <th>Role</th>
+            <th>Material Scope</th>
+            <th>AI Chat Scope</th>
+            <th>Administrative Powers</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="glass-badge glass-badge-blue">Student</span></td>
+            <td>Enrolled Department & Semester only</td>
+            <td>Enrolled Subjects & Uploaded PDFs</td>
+            <td>Personal profile & Bookmarks</td>
+          </tr>
+          <tr>
+            <td><span class="glass-badge glass-badge-purple">Faculty</span></td>
+            <td>Assigned Department & Courses</td>
+            <td>All Materials in Assigned Subjects</td>
+            <td>Upload, Edit & Delete Own Materials</td>
+          </tr>
+          <tr>
+            <td><span class="glass-badge glass-badge-pink">Admin</span></td>
+            <td>College-wide Full Access</td>
+            <td>All Subjects & Documents</td>
+            <td>Full User & Curriculum Management</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+

@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+
+{% block title %}Faculty Hub — Padika AI{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 30px; padding-bottom: 60px;">
+  
+  <!-- FACULTY HEADER -->
+  <div class="glass-panel" style="padding: 28px 32px; margin-bottom: 32px; border-color: rgba(168, 85, 247, 0.4);">
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;">
+      <div>
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+          <span class="glass-badge glass-badge-purple">FACULTY PORTAL</span>
+          {% if department %}
+            <span class="glass-badge glass-badge-blue">{{ department.code }} — {{ department.name }}</span>
+          {% endif %}
+        </div>
+        <h1 style="font-size: 2rem; font-weight: 800; margin: 0; color: #fff;">
+          {{ user.full_name }}
+        </h1>
+        <p style="color: var(--text-muted); font-size: 0.95rem; margin-top: 6px;">
+          Upload course notes, syllabi, and question banks. Padika AI automatically parses and indexes them for student RAG tutoring.
+        </p>
+      </div>
+
+      <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+        <a href="{{ url_for('faculty.upload') }}" class="glass-btn glass-btn-primary">
+          + Upload New PDF Material
+        </a>
+        <a href="{{ url_for('faculty.manage_materials') }}" class="glass-btn glass-btn-secondary">
+          Manage All Materials
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- STATS OVERVIEW -->
+  <div class="grid-cols-4" style="margin-bottom: 36px;">
+    
+    <div class="glass-card stat-card">
+      <div class="stat-icon" style="background: rgba(168, 85, 247, 0.2); color: #c4b5fd;">📑</div>
+      <div>
+        <div class="stat-value">{{ stats.total_materials }}</div>
+        <div class="stat-label">Uploaded Materials</div>
+      </div>
+    </div>
+
+    <div class="glass-card stat-card">
+      <div class="stat-icon" style="background: rgba(56, 189, 248, 0.2); color: #38bdf8;">👁</div>
+      <div>
+        <div class="stat-value">{{ stats.total_views }}</div>
+        <div class="stat-label">Student Reads</div>
+      </div>
+    </div>
+
+    <div class="glass-card stat-card">
+      <div class="stat-icon" style="background: rgba(16, 185, 129, 0.2); color: #10b981;">⬇</div>
+      <div>
+        <div class="stat-value">{{ stats.total_downloads }}</div>
+        <div class="stat-label">Total Downloads</div>
+      </div>
+    </div>
+
+    <div class="glass-card stat-card">
+      <div class="stat-icon" style="background: rgba(236, 72, 153, 0.2); color: #ec4899;">✦</div>
+      <div>
+        <div class="stat-value">{{ stats.completed_count }}</div>
+        <div class="stat-label">AI Vector Indexed</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- RECENT UPLOADED MATERIALS TABLE -->
+  <div class="glass-panel" style="padding: 28px; margin-bottom: 36px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+      <div>
+        <h2 style="font-size: 1.3rem; font-weight: 700; color: #fff;">Your Uploaded Academic Materials</h2>
+        <p style="color: var(--text-dim); font-size: 0.85rem;">Status of PyMuPDF text parsing, chunking, and multilingual vector embeddings</p>
+      </div>
+
+      <a href="{{ url_for('faculty.manage_materials') }}" style="color: #38bdf8; text-decoration: none; font-size: 0.9rem; font-weight: 600;">
+        Manage All ({{ stats.total_materials }}) →
+      </a>
+    </div>
+
+    <div class="glass-table-container">
+      <table class="glass-table">
+        <thead>
+          <tr>
+            <th>Material Title</th>
+            <th>Subject & Category</th>
+            <th>Pages & AI Chunks</th>
+            <th>Processing Status</th>
+            <th>Reads / Downloads</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for mat in materials %}
+            <tr>
+              <td>
+                <div style="font-weight: 700; color: #fff;">{{ mat.title }}</div>
+                <div style="font-size: 0.8rem; color: var(--text-dim);">{{ mat.original_filename }} ({{ mat.file_size|filesizeformat }})</div>
+              </td>
+              <td>
+                <div><span class="glass-badge glass-badge-purple">{{ mat.category }}</span></div>
+                <div style="font-size: 0.82rem; color: var(--text-muted); margin-top: 4px;">{{ mat.subject_code }} — {{ mat.subject_name }}</div>
+              </td>
+              <td>
+                <span style="font-weight: 600; color: #fff;">{{ mat.page_count }}</span> pgs • 
+                <span style="color: #38bdf8; font-weight: 600;">{{ mat.chunk_count }}</span> chunks
+              </td>
+              <td>
+                {% if mat.status == 'Completed' %}
+                  <span class="glass-badge glass-badge-green">✓ Indexed</span>
+                {% elif mat.status == 'Processing' %}
+                  <span class="glass-badge glass-badge-amber">⏳ Processing</span>
+                {% else %}
+                  <span class="glass-badge glass-badge-danger">✕ Failed</span>
+                {% endif %}
+              </td>
+              <td>
+                <span style="color: var(--text-muted);">{{ mat.view_count }} views • {{ mat.download_count }} dl</span>
+              </td>
+              <td>
+                <div style="display: flex; gap: 8px;">
+                  <a href="{{ url_for('materials_routes.view_pdf', material_id=mat.id) }}" class="glass-btn glass-btn-sm" title="Preview PDF">
+                    👁
+                  </a>
+                  <a href="{{ url_for('chat_routes.chat_view', material_id=mat.id) }}" class="glass-btn glass-btn-sm glass-btn-primary" title="Test AI with this PDF">
+                    ✦ AI Test
+                  </a>
+                </div>
+              </td>
+            </tr>
+          {% else %}
+            <tr>
+              <td colspan="6" style="text-align: center; padding: 30px; color: var(--text-muted);">
+                You haven't uploaded any documents yet. 
+                <a href="{{ url_for('faculty.upload') }}" style="color: #38bdf8; margin-left: 6px;">Upload your first course PDF</a>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+

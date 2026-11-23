@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block title %}Saved Bookmarks — Padika AI{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 30px; padding-bottom: 60px;">
+  
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px; flex-wrap: wrap; gap: 16px;">
+    <div>
+      <h1 style="font-size: 2rem; font-weight: 800; color: #fff;">My Saved Bookmarks ★</h1>
+      <p style="color: var(--text-muted); font-size: 0.95rem;">Quick access to your prioritized revision and exam documents</p>
+    </div>
+
+    <a href="{{ url_for('student.materials') }}" class="glass-btn glass-btn-secondary">
+      ← Back to All Materials
+    </a>
+  </div>
+
+  <div class="grid-cols-3">
+    {% for bm in bookmarks %}
+      <div class="glass-card" style="display: flex; flex-direction: column; justify-content: space-between;">
+        <div>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <span class="glass-badge glass-badge-amber">★ Bookmarked</span>
+            <span class="glass-badge glass-badge-purple">{{ bm.category }}</span>
+          </div>
+
+          <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 6px; color: #fff;">
+            {{ bm.title }}
+          </h3>
+
+          <p style="font-size: 0.85rem; color: #38bdf8; margin-bottom: 10px;">
+            {{ bm.subject_code }} — {{ bm.subject_name }}
+          </p>
+
+          <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 14px;">
+            {{ bm.description or 'Bookmarked study document.' }}
+          </p>
+
+          <div style="font-size: 0.8rem; color: var(--text-dim); margin-bottom: 14px;">
+            Author: <strong>{{ bm.faculty_name }}</strong> • {{ bm.page_count }} Pages
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 8px; align-items: center; padding-top: 14px; border-top: 1px solid rgba(255, 255, 255, 0.08);">
+          <a href="{{ url_for('materials_routes.view_pdf', material_id=bm.material_id) }}" class="glass-btn glass-btn-sm glass-btn-secondary" style="flex: 1;">
+            📖 Read
+          </a>
+          <a href="{{ url_for('chat_routes.chat_view', material_id=bm.material_id) }}" class="glass-btn glass-btn-sm glass-btn-primary" style="flex: 1;">
+            ✦ Ask AI
+          </a>
+          <button class="glass-btn glass-btn-sm bookmark-toggle-btn active" data-material-id="{{ bm.material_id }}" title="Remove bookmark">
+            <span class="bookmark-icon">★</span>
+          </button>
+        </div>
+      </div>
+    {% else %}
+      <div class="glass-card" style="grid-column: 1 / -1; text-align: center; padding: 60px;">
+        <div style="font-size: 3rem; margin-bottom: 12px; color: #f59e0b;">★</div>
+        <h3 style="color: #fff; margin-bottom: 8px;">No bookmarked materials yet</h3>
+        <p style="color: var(--text-muted); margin-bottom: 20px;">
+          Click the star icon (☆) on any course notes or textbook to save it here for fast revision.
+        </p>
+        <a href="{{ url_for('student.materials') }}" class="glass-btn glass-btn-primary">
+          Browse Course Materials
+        </a>
+      </div>
+    {% endfor %}
+  </div>
+
+</div>
+{% endblock %}
+

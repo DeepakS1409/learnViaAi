@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}Sign In — Padika AI{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 520px; padding-top: 50px; padding-bottom: 60px;">
+  
+  <div class="glass-panel" style="padding: 40px; border-color: rgba(168, 85, 247, 0.4); box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);">
+    
+    <div style="text-align: center; margin-bottom: 28px;">
+      <div class="logo-icon" style="margin: 0 auto 16px; width: 48px; height: 48px; font-size: 1.4rem;">P</div>
+      <h2 style="font-size: 1.8rem; font-weight: 800; margin-bottom: 6px;">Welcome Back</h2>
+      <p style="color: var(--text-muted); font-size: 0.92rem;">Sign in to access your grounded academic materials</p>
+    </div>
+
+    <!-- Quick Demo Accounts One-Click Fill -->
+    <div style="background: rgba(255, 255, 255, 0.04); border: 1px dashed rgba(255, 255, 255, 0.15); border-radius: 14px; padding: 14px; margin-bottom: 24px;">
+      <div style="font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700; color: var(--text-dim); margin-bottom: 8px;">
+        ⚡ Quick Demo Logins (Click to autofill):
+      </div>
+      <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+        <button type="button" class="glass-btn glass-btn-sm" onclick="fillDemo('student@padika.ai', 'Student@123')">
+          👨‍🎓 Student Demo
+        </button>
+        <button type="button" class="glass-btn glass-btn-sm" onclick="fillDemo('faculty@padika.ai', 'Faculty@123')">
+          👩‍🏫 Faculty Demo
+        </button>
+        <button type="button" class="glass-btn glass-btn-sm" onclick="fillDemo('admin@padika.ai', 'Admin@123')">
+          🛡️ Admin Demo
+        </button>
+      </div>
+    </div>
+
+    <form method="POST" action="{{ url_for('auth_routes.login') }}">
+      
+      <div class="glass-form-group">
+        <label class="glass-label" for="email">College Email Address</label>
+        <input type="email" id="email" name="email" class="glass-input" placeholder="e.g. yourname@college.edu" required autocomplete="email">
+      </div>
+
+      <div class="glass-form-group">
+        <label class="glass-label" for="password">Password</label>
+        <input type="password" id="password" name="password" class="glass-input" placeholder="••••••••" required autocomplete="current-password">
+      </div>
+
+      <button type="submit" class="glass-btn glass-btn-primary" style="width: 100%; margin-top: 10px; padding: 12px;">
+        Sign In to Padika AI →
+      </button>
+
+    </form>
+
+    <div style="text-align: center; margin-top: 24px; padding-top: 20px; border-top: 1px solid rgba(255, 255, 255, 0.08); font-size: 0.9rem; color: var(--text-muted);">
+      Don't have an account yet? <br>
+      <div style="margin-top: 8px; display: flex; justify-content: center; gap: 14px;">
+        <a href="{{ url_for('auth_routes.register_student') }}" style="color: #38bdf8; text-decoration: none; font-weight: 600;">Register as Student</a>
+        <span style="color: var(--text-dim);">•</span>
+        <a href="{{ url_for('auth_routes.register_faculty') }}" style="color: #a855f7; text-decoration: none; font-weight: 600;">Register as Faculty</a>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+function fillDemo(email, pass) {
+  document.getElementById('email').value = email;
+  document.getElementById('password').value = pass;
+}
+</script>
+{% endblock %}
+

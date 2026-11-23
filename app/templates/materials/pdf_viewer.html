@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+
+{% block title %}Reading: {{ material.title }} — Padika AI{% endblock %}
+
+{% block footer %}
+{# Omit standard footer for full-screen immersive PDF reader #}
+{% endblock %}
+
+{% block content %}
+<input type="hidden" id="currentMaterialId" value="{{ material.id }}">
+
+<div class="pdf-viewer-layout">
+  
+  <!-- FROSTED GLASS READER TOOLBAR -->
+  <header class="pdf-toolbar">
+    
+    <div class="pdf-doc-meta">
+      <a href="{{ url_for('materials_routes.library') }}" class="glass-btn glass-btn-sm" title="Back to Library">
+        ← Back
+      </a>
+
+      <div>
+        <div class="pdf-doc-title" title="{{ material.title }}">
+          {{ material.title }}
+        </div>
+        <div style="display: flex; gap: 8px; align-items: center; font-size: 0.78rem; margin-top: 2px;">
+          <span class="glass-badge glass-badge-blue" style="padding: 2px 8px; font-size: 0.7rem;">{{ material.category }}</span>
+          <span style="color: var(--text-dim);">{{ material.subject_code }} — {{ material.subject_name }}</span>
+          <span style="color: var(--text-dim);">•</span>
+          <span style="color: var(--text-dim);">By {{ material.faculty_name }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Controls Group -->
+    <div class="pdf-controls-group">
+      <span class="page-indicator-badge">
+        📄 {{ material.page_count }} Pages
+      </span>
+
+      <button id="toggleAiBtn" class="glass-btn glass-btn-sm glass-btn-primary" title="Toggle AI Study Assistant">
+        ✦ Ask AI in Document
+      </button>
+
+      <button class="glass-btn glass-btn-sm bookmark-toggle-btn {% if is_bookmarked %}active{% endif %}" data-material-id="{{ material.id }}" title="Bookmark this note">
+        <span class="bookmark-icon">{% if is_bookmarked %}★{% else %}☆{% endif %}</span>
+      </button>
+
+      <a href="{{ url_for('materials_routes.download_material', material_id=material.id) }}" class="glass-btn glass-btn-sm" title="Download original PDF file">
+        ⬇ Download
+      </a>
+
+      <button id="fullscreenBtn" class="glass-btn glass-btn-sm" title="Toggle Fullscreen">
+        ⛶
+      </button>
+    </div>
+
+  </header>
+
+  <!-- READER BODY & AI DRAWER -->
+  <div class="pdf-viewer-body">
+    
+    <!-- PDF Frame Container -->
+    <div class="pdf-frame-container">
+      <iframe class="pdf-iframe" src="{{ url_for('materials_routes.serve_pdf', material_id=material.id) }}#toolbar=1&navpanes=1" title="PDF Document Viewer">
+        <p style="color: #fff; padding: 20px;">
+          Your browser does not support embedded frames. 
+          <a href="{{ url_for('materials_routes.download_material', material_id=material.id) }}" style="color: #38bdf8;">Download the PDF</a>.
+        </p>
+      </iframe>
+    </div>
+
+    <!-- Quick AI Study Assistant Drawer -->
+    <aside id="pdfAiDrawer" class="pdf-ai-drawer collapsed">
+      <div class="pdf-ai-header">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <div class="logo-icon" style="width: 28px; height: 28px; font-size: 0.9rem;">P</div>
+          <span style="font-weight: 700; color: #fff; font-size: 0.95rem;">Grounded AI Assistant</span>
+        </div>
+        <button id="closeAiDrawer" style="background: none; border: none; color: #fff; font-size: 1.3rem; cursor: pointer;">&times;</button>
+      </div>
+
+      <div class="pdf-ai-messages" id="pdfAiMessages">
+        <div style="background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 14px; font-size: 0.88rem; color: var(--text-muted); line-height: 1.5;">
+          👋 Hi! I am Padika AI. Ask me any question specifically grounded in <strong>"{{ material.title }}"</strong>.
+          <div style="margin-top: 8px; font-size: 0.8rem; color: #38bdf8;">
+            Tip: You can ask in English, தமிழ், or Tanglish!
+          </div>
+        </div>
+      </div>
+
+      <form id="pdfAiForm" class="pdf-ai-input-bar">
+        <input type="text" id="pdfAiInput" class="glass-input" style="padding: 10px 14px; font-size: 0.88rem;" placeholder="Ask about this document..." autocomplete="off" required>
+        <button type="submit" class="glass-btn glass-btn-primary glass-btn-sm" style="padding: 0 16px;">
+          Send
+        </button>
+      </form>
+    </aside>
+
+  </div>
+
+</div>
+
+<script src="{{ url_for('static', filename='js/pdf_viewer.js') }}"></script>
+{% endblock %}
+

@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Materials — Padika AI{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 30px; padding-bottom: 60px;">
+  
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px; flex-wrap: wrap; gap: 16px;">
+    <div>
+      <h1 style="font-size: 2rem; font-weight: 800; color: #fff;">Manage Academic Materials</h1>
+      <p style="color: var(--text-muted); font-size: 0.95rem;">Review indexed PDFs, edit details, or remove obsolete documents</p>
+    </div>
+
+    <div style="display: flex; gap: 10px;">
+      <a href="{{ url_for('faculty.upload') }}" class="glass-btn glass-btn-primary">
+        + Upload New PDF
+      </a>
+      <a href="{{ url_for('faculty.dashboard') }}" class="glass-btn glass-btn-secondary">
+        ← Hub Dashboard
+      </a>
+    </div>
+  </div>
+
+  <div class="glass-panel" style="padding: 24px;">
+    <div class="glass-table-container">
+      <table class="glass-table">
+        <thead>
+          <tr>
+            <th>Document Info</th>
+            <th>Target Audience</th>
+            <th>Pages & AI Chunks</th>
+            <th>Index Status</th>
+            <th>Usage</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for mat in materials %}
+            <tr>
+              <td>
+                <div style="font-weight: 700; color: #fff; font-size: 0.98rem;">{{ mat.title }}</div>
+                <div style="font-size: 0.8rem; color: var(--text-dim);">
+                  {{ mat.category }} • {{ mat.original_filename }} ({{ mat.file_size|filesizeformat }})
+                </div>
+                <div style="font-size: 0.82rem; color: var(--text-muted); margin-top: 4px; max-width: 320px;">
+                  {{ mat.description or 'No description provided.' }}
+                </div>
+              </td>
+
+              <td>
+                <div><span class="glass-badge glass-badge-purple">{{ mat.department_code }}</span></div>
+                <div style="font-size: 0.82rem; color: var(--text-muted); margin-top: 4px;">
+                  {{ mat.subject_code }} — {{ mat.subject_name }} (Sem {{ mat.semester_number }})
+                </div>
+              </td>
+
+              <td>
+                <div style="font-weight: 600; color: #fff;">{{ mat.page_count }} Pages</div>
+                <div style="font-size: 0.82rem; color: #38bdf8;">{{ mat.chunk_count }} Chunks in Vector DB</div>
+              </td>
+
+              <td>
+                {% if mat.status == 'Completed' %}
+                  <span class="glass-badge glass-badge-green">✓ Ready</span>
+                {% elif mat.status == 'Processing' %}
+                  <span class="glass-badge glass-badge-amber">⏳ In Progress</span>
+                {% else %}
+                  <span class="glass-badge glass-badge-danger">✕ Failed</span>
+                {% endif %}
+              </td>
+
+              <td>
+                <div style="color: var(--text-muted); font-size: 0.85rem;">
+                  👁 {{ mat.view_count }} views<br>
+                  ⬇ {{ mat.download_count }} downloads
+                </div>
+              </td>
+
+              <td>
+                <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                  <a href="{{ url_for('materials_routes.view_pdf', material_id=mat.id) }}" class="glass-btn glass-btn-sm" title="Open in PDF Reader">
+                    Read
+                  </a>
+                  <button type="button" class="glass-btn glass-btn-sm glass-btn-secondary" onclick="openEditModal({{ mat.id }}, '{{ mat.title|replace("'", "\\'") }}', '{{ mat.description|replace("'", "\\'") if mat.description else "" }}', '{{ mat.category }}')">
+                    Edit
+                  </button>
+                  <form method="POST" action="{{ url_for('faculty.delete_material', material_id=mat.id) }}" onsubmit="return confirm('Permanently delete this material and its AI vector index?');" style="display: inline;">
+                    <button type="submit" class="glass-btn glass-btn-sm glass-btn-danger">
+                      Delete
+                    </button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+          {% else %}
+            <tr>
+              <td colspan="6" style="text-align: center; padding: 40px; color: var(--text-muted);">
+                No materials available to manage. 
+                <a href="{{ url_for('faculty.upload') }}" style="color: #38bdf8; margin-left: 6px;">Upload a PDF</a>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<!-- EDIT MATERIAL MODAL -->
+<div id="editMaterialModal" class="glass-modal-overlay">
+  <div class="glass-panel glass-modal-content" style="padding: 30px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+      <h3 style="font-size: 1.3rem; font-weight: 700; color: #fff;">Edit Material Details</h3>
+      <button type="button" class="modal-close-btn" style="background: none; border: none; color: #fff; font-size: 1.5rem; cursor: pointer;">&times;</button>
+    </div>
+
+    <form method="POST" id="editMaterialForm" action="">
+      <div class="glass-form-group">
+        <label class="glass-label" for="edit_title">Title *</label>
+        <input type="text" id="edit_title" name="title" class="glass-input" required>
+      </div>
+
+      <div class="glass-form-group">
+        <label class="glass-label" for="edit_category">Category</label>
+        <select id="edit_category" name="category" class="glass-select">
+          <option value="Notes">Lecture Notes</option>
+          <option value="Book">Textbook / Reference Book</option>
+          <option value="Question Bank">Question Bank / 2-Mark & 16-Mark</option>
+          <option value="PPT">Presentation Slides / PPT</option>
+          <option value="Syllabus">Curriculum / Syllabus</option>
+        </select>
+      </div>
+
+      <div class="glass-form-group">
+        <label class="glass-label" for="edit_description">Description</label>
+        <textarea id="edit_description" name="description" class="glass-textarea" rows="3"></textarea>
+      </div>
+
+      <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
+        <button type="button" class="glass-btn modal-close-btn">Cancel</button>
+        <button type="submit" class="glass-btn glass-btn-primary">Save Changes</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+function openEditModal(id, title, desc, category) {
+  const form = document.getElementById('editMaterialForm');
+  form.action = `/faculty/materials/${id}/edit`;
+  document.getElementById('edit_title').value = title;
+  document.getElementById('edit_description').value = desc;
+  document.getElementById('edit_category').value = category;
+  document.getElementById('editMaterialModal').classList.add('active');
+}
+</script>
+{% endblock %}
+

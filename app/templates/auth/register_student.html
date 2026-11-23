@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block title %}Student Registration — Padika AI{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 620px; padding-top: 40px; padding-bottom: 60px;">
+  
+  <div class="glass-panel" style="padding: 40px; border-color: rgba(56, 189, 248, 0.4);">
+    
+    <div style="text-align: center; margin-bottom: 28px;">
+      <span class="glass-badge glass-badge-blue">STUDENT ENROLLMENT</span>
+      <h2 style="font-size: 1.8rem; font-weight: 800; margin-top: 10px; margin-bottom: 6px;">
+        Join the Student Portal
+      </h2>
+      <p style="color: var(--text-muted); font-size: 0.92rem;">
+        Select your department and semester to access faculty-curated materials and AI exam tutoring.
+      </p>
+    </div>
+
+    <form method="POST" action="{{ url_for('auth_routes.register_student') }}">
+      
+      <div class="glass-form-group">
+        <label class="glass-label" for="full_name">Full Name</label>
+        <input type="text" id="full_name" name="full_name" class="glass-input" placeholder="e.g. Ananya Sundaram" required>
+      </div>
+
+      <div class="grid-cols-2">
+        <div class="glass-form-group">
+          <label class="glass-label" for="email">College Email Address</label>
+          <input type="email" id="email" name="email" class="glass-input" placeholder="student@college.edu" required>
+        </div>
+
+        <div class="glass-form-group">
+          <label class="glass-label" for="roll_number">Roll / Register Number</label>
+          <input type="text" id="roll_number" name="roll_number" class="glass-input" placeholder="e.g. 714022104015">
+        </div>
+      </div>
+
+      <div class="grid-cols-2">
+        <div class="glass-form-group">
+          <label class="glass-label" for="department_id">Department</label>
+          <select id="department_id" name="department_id" class="glass-select" required>
+            <option value="">Select Department</option>
+            {% for d in departments %}
+              <option value="{{ d.id }}">{{ d.code }} — {{ d.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="glass-form-group">
+          <label class="glass-label" for="semester_id">Current Semester</label>
+          <select id="semester_id" name="semester_id" class="glass-select" required>
+            <option value="">Select Semester</option>
+            {% for s in semesters %}
+              <option value="{{ s.id }}">Semester {{ s.number }} ({{ s.name }})</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+
+      <div class="grid-cols-2">
+        <div class="glass-form-group">
+          <label class="glass-label" for="password">Create Password</label>
+          <input type="password" id="password" name="password" class="glass-input" placeholder="Min 6 characters" required>
+        </div>
+
+        <div class="glass-form-group">
+          <label class="glass-label" for="confirm_password">Confirm Password</label>
+          <input type="password" id="confirm_password" name="confirm_password" class="glass-input" placeholder="Re-enter password" required>
+        </div>
+      </div>
+
+      <button type="submit" class="glass-btn glass-btn-primary" style="width: 100%; margin-top: 14px; padding: 13px;">
+        Complete Student Registration →
+      </button>
+
+    </form>
+
+    <div style="text-align: center; margin-top: 24px; padding-top: 20px; border-top: 1px solid rgba(255, 255, 255, 0.08); font-size: 0.9rem; color: var(--text-muted);">
+      Already have an account? 
+      <a href="{{ url_for('auth_routes.login') }}" style="color: #38bdf8; text-decoration: none; font-weight: 600; margin-left: 6px;">Sign In here</a>
+    </div>
+
+  </div>
+
+</div>
+{% endblock %}
+

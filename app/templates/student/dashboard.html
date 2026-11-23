@@ -1,0 +1,212 @@
+{% extends "base.html" %}
+
+{% block title %}Student Dashboard — Padika AI{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 30px; padding-bottom: 60px;">
+  
+  <!-- WELCOME HEADER -->
+  <div class="glass-panel" style="padding: 28px 32px; margin-bottom: 32px; border-color: rgba(56, 189, 248, 0.35);">
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;">
+      <div>
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+          <span class="glass-badge glass-badge-blue">STUDENT PORTAL</span>
+          {% if department %}
+            <span class="glass-badge glass-badge-purple">{{ department.code }}</span>
+          {% endif %}
+          {% if semester %}
+            <span class="glass-badge glass-badge-green">Semester {{ semester.number }}</span>
+          {% endif %}
+        </div>
+        <h1 style="font-size: 2rem; font-weight: 800; margin: 0; color: #fff;">
+          Welcome, {{ user.full_name }} 👋
+        </h1>
+        <p style="color: var(--text-muted); font-size: 0.95rem; margin-top: 6px;">
+          Access your faculty notes, read PDFs, or ask our grounded AI questions in English, தமிழ், or Tanglish.
+        </p>
+      </div>
+
+      <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+        <a href="{{ url_for('chat_routes.chat_view') }}" class="glass-btn glass-btn-primary">
+          ✦ Ask AI Mentor
+        </a>
+        <a href="{{ url_for('student.materials') }}" class="glass-btn glass-btn-secondary">
+          Browse All Notes
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- STATS OVERVIEW -->
+  <div class="grid-cols-4" style="margin-bottom: 36px;">
+    
+    <div class="glass-card stat-card">
+      <div class="stat-icon" style="background: rgba(56, 189, 248, 0.2); color: #38bdf8;">📚</div>
+      <div>
+        <div class="stat-value">{{ subjects|length }}</div>
+        <div class="stat-label">Enrolled Subjects</div>
+      </div>
+    </div>
+
+    <div class="glass-card stat-card">
+      <div class="stat-icon" style="background: rgba(168, 85, 247, 0.2); color: #a855f7;">📑</div>
+      <div>
+        <div class="stat-value">{{ materials|length }}</div>
+        <div class="stat-label">Faculty Notes</div>
+      </div>
+    </div>
+
+    <div class="glass-card stat-card">
+      <div class="stat-icon" style="background: rgba(245, 158, 11, 0.2); color: #f59e0b;">★</div>
+      <div>
+        <div class="stat-value">{{ bookmarks|length }}</div>
+        <div class="stat-label">Bookmarks</div>
+      </div>
+    </div>
+
+    <div class="glass-card stat-card">
+      <div class="stat-icon" style="background: rgba(16, 185, 129, 0.2); color: #10b981;">💬</div>
+      <div>
+        <div class="stat-value">{{ recent_chats|length }}</div>
+        <div class="stat-label">AI Study Sessions</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ENROLLED SUBJECTS GRID -->
+  <div style="margin-bottom: 40px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
+      <h2 style="font-size: 1.4rem; font-weight: 700; color: #fff;">
+        Your Enrolled Subjects
+      </h2>
+      <span style="color: var(--text-dim); font-size: 0.88rem;">Semester {{ semester.number if semester else 'Current' }}</span>
+    </div>
+
+    <div class="grid-cols-3">
+      {% for sub in subjects %}
+        <div class="glass-card glass-card-interactive" style="border-left: 4px solid var(--accent-indigo);">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+            <span class="glass-badge glass-badge-purple">{{ sub.code }}</span>
+            <span style="font-size: 0.8rem; color: var(--text-dim);">{{ sub.credits }} Credits</span>
+          </div>
+
+          <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 8px; color: #fff;">
+            {{ sub.name }}
+          </h3>
+
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px; min-height: 40px;">
+            {{ sub.description or 'Official semester course material, notes, and question bank.' }}
+          </p>
+
+          <div style="display: flex; gap: 8px;">
+            <a href="{{ url_for('materials_routes.subject_materials', subject_id=sub.id) }}" class="glass-btn glass-btn-sm" style="flex: 1;">
+              View Notes
+            </a>
+            <a href="{{ url_for('chat_routes.chat_view', subject_id=sub.id) }}" class="glass-btn glass-btn-sm glass-btn-primary" style="flex: 1;" title="Ask AI about this subject">
+              Ask AI ✦
+            </a>
+          </div>
+        </div>
+      {% else %}
+        <div class="glass-card" style="grid-column: 1 / -1; text-align: center; padding: 40px;">
+          <p style="color: var(--text-muted); margin-bottom: 12px;">No subjects found for your department and semester.</p>
+          <a href="{{ url_for('profile_routes.profile') }}" class="glass-btn glass-btn-sm glass-btn-secondary">Update Department & Semester in Profile</a>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- RECENT FACULTY MATERIALS -->
+  <div style="margin-bottom: 40px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
+      <h2 style="font-size: 1.4rem; font-weight: 700; color: #fff;">
+        Recent Faculty Uploads
+      </h2>
+      <a href="{{ url_for('student.materials') }}" style="color: #38bdf8; text-decoration: none; font-size: 0.9rem; font-weight: 600;">
+        View All →
+      </a>
+    </div>
+
+    <div class="grid-cols-2">
+      {% for mat in materials %}
+        <div class="glass-card" style="display: flex; flex-direction: column; justify-content: space-between;">
+          <div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+              <span class="glass-badge glass-badge-blue">{{ mat.category }}</span>
+              <span style="font-size: 0.8rem; color: var(--text-dim);">
+                {{ mat.page_count }} Pages • {{ mat.file_size|filesizeformat }}
+              </span>
+            </div>
+
+            <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 6px; color: #fff;">
+              {{ mat.title }}
+            </h3>
+
+            <p style="font-size: 0.86rem; color: var(--text-dim); margin-bottom: 12px;">
+              {{ mat.subject_code }} — {{ mat.subject_name }} • By <strong>{{ mat.faculty_name }}</strong>
+            </p>
+
+            <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 16px;">
+              {{ mat.description or 'Curriculum verified document ready for examination study and AI consultation.' }}
+            </p>
+          </div>
+
+          <div style="display: flex; gap: 8px; align-items: center; padding-top: 14px; border-top: 1px solid rgba(255, 255, 255, 0.06);">
+            <a href="{{ url_for('materials_routes.view_pdf', material_id=mat.id) }}" class="glass-btn glass-btn-sm glass-btn-secondary" style="flex: 1;">
+              📖 Read PDF
+            </a>
+            <a href="{{ url_for('chat_routes.chat_view', material_id=mat.id, subject_id=mat.subject_id) }}" class="glass-btn glass-btn-sm glass-btn-primary" style="flex: 1;">
+              ✦ Ask AI
+            </a>
+            <button class="glass-btn glass-btn-sm bookmark-toggle-btn" data-material-id="{{ mat.id }}" title="Bookmark this note">
+              <span class="bookmark-icon">☆</span>
+            </button>
+          </div>
+        </div>
+      {% else %}
+        <div class="glass-card" style="grid-column: 1 / -1; text-align: center; padding: 40px;">
+          <p style="color: var(--text-muted);">No materials uploaded yet for your current semester.</p>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- RECENT CHAT SESSIONS STRIP -->
+  {% if recent_chats %}
+  <div>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
+      <h2 style="font-size: 1.4rem; font-weight: 700; color: #fff;">
+        Recent AI Chatbot Conversations
+      </h2>
+      <a href="{{ url_for('chat_routes.history') }}" style="color: #a855f7; text-decoration: none; font-size: 0.9rem; font-weight: 600;">
+        Full Chat History →
+      </a>
+    </div>
+
+    <div class="grid-cols-2">
+      {% for chat in recent_chats %}
+        <a href="{{ url_for('chat_routes.chat_view', session_id=chat.id) }}" class="glass-card glass-card-interactive" style="text-decoration: none; display: block;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <span style="font-weight: 700; color: #fff; font-size: 1.05rem;">
+              💬 {{ chat.title }}
+            </span>
+            <span class="glass-badge glass-badge-purple">{{ chat.message_count }} msgs</span>
+          </div>
+          <p style="font-size: 0.85rem; color: var(--text-dim); margin-bottom: 6px;">
+            {{ chat.subject_name or 'General Academic Query' }} • {{ chat.updated_at|datetimeformat }}
+          </p>
+          {% if chat.last_message %}
+            <p style="font-size: 0.88rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+              "{{ chat.last_message }}"
+            </p>
+          {% endif %}
+        </a>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}
+

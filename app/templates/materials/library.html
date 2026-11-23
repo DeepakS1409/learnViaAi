@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+
+{% block title %}Materials Library — Padika AI{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 30px; padding-bottom: 60px;">
+  
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
+    <div>
+      <h1 style="font-size: 2rem; font-weight: 800; color: #fff;">Curriculum Materials Library</h1>
+      <p style="color: var(--text-muted); font-size: 0.95rem;">
+        Search and browse verified college lecture notes, question banks, and textbooks
+      </p>
+    </div>
+
+    <a href="{{ url_for('chat_routes.chat_view') }}" class="glass-btn glass-btn-primary">
+      ✦ Open AI Mentor Chat
+    </a>
+  </div>
+
+  <!-- MULTI-DIMENSIONAL GLASS FILTER BAR -->
+  <div class="glass-panel" style="padding: 24px; margin-bottom: 32px;">
+    <form method="GET" action="{{ url_for('materials_routes.library') }}" style="display: flex; flex-direction: column; gap: 16px;">
+      
+      <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+        <!-- Keyword Search -->
+        <div style="flex: 2; min-width: 240px;">
+          <input type="text" name="search" class="glass-input" placeholder="Search by document title, keywords, or course code..." value="{{ search or '' }}">
+        </div>
+
+        <!-- Department Filter -->
+        <div style="flex: 1; min-width: 170px;">
+          <select name="department_id" class="glass-select">
+            <option value="">All Departments</option>
+            {% for d in departments %}
+              <option value="{{ d.id }}" {% if selected_dept and selected_dept == d.id %}selected{% endif %}>
+                {{ d.code }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <!-- Semester Filter -->
+        <div style="flex: 1; min-width: 150px;">
+          <select name="semester_id" class="glass-select">
+            <option value="">All Semesters</option>
+            {% for sem in semesters %}
+              <option value="{{ sem.id }}" {% if selected_sem and selected_sem == sem.id %}selected{% endif %}>
+                Semester {{ sem.number }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <button type="submit" class="glass-btn glass-btn-primary">
+          Filter
+        </button>
+
+        {% if search or selected_dept or selected_sem or (selected_cat and selected_cat != 'All') %}
+          <a href="{{ url_for('materials_routes.library') }}" class="glass-btn">
+            Reset
+          </a>
+        {% endif %}
+      </div>
+
+      <!-- Category Filter Pills -->
+      <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+        <span style="font-size: 0.8rem; font-weight: 700; color: var(--text-dim); text-transform: uppercase;">Category:</span>
+        {% for cat in ['All', 'Notes', 'Book', 'PPT', 'Question Bank', 'Syllabus'] %}
+          <a href="{{ url_for('materials_routes.library', category=cat, department_id=selected_dept, semester_id=selected_sem, search=search) }}"
+             class="format-pill {% if (selected_cat == cat) or (not selected_cat and cat == 'All') %}active{% endif %}"
+             style="text-decoration: none;">
+            {{ cat }}
+          </a>
+        {% endfor %}
+      </div>
+
+    </form>
+  </div>
+
+  <!-- MATERIALS GRID -->
+  <div class="grid-cols-3">
+    {% for mat in materials %}
+      <div class="glass-card" style="display: flex; flex-direction: column; justify-content: space-between;">
+        <div>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <span class="glass-badge glass-badge-blue">{{ mat.category }}</span>
+            <span class="glass-badge glass-badge-purple">{{ mat.department_code }} Sem {{ mat.semester_number }}</span>
+          </div>
+
+          <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 6px; color: #fff;">
+            {{ mat.title }}
+          </h3>
+
+          <p style="font-size: 0.85rem; color: #38bdf8; margin-bottom: 10px;">
+            {{ mat.subject_code }} — {{ mat.subject_name }}
+          </p>
+
+          <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 16px; line-height: 1.5;">
+            {{ mat.description or 'Curriculum verified document ready for examination study and AI consultation.' }}
+          </p>
+
+          <div style="font-size: 0.8rem; color: var(--text-dim); margin-bottom: 16px;">
+            Faculty: <strong>{{ mat.faculty_name }}</strong> • {{ mat.page_count }} Pages • {{ mat.file_size|filesizeformat }}
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 8px; align-items: center; padding-top: 14px; border-top: 1px solid rgba(255, 255, 255, 0.08);">
+          <a href="{{ url_for('materials_routes.view_pdf', material_id=mat.id) }}" class="glass-btn glass-btn-sm glass-btn-secondary" style="flex: 1;">
+            📖 Read
+          </a>
+          <a href="{{ url_for('chat_routes.chat_view', material_id=mat.id, subject_id=mat.subject_id) }}" class="glass-btn glass-btn-sm glass-btn-primary" style="flex: 1;" title="Ask questions about this specific document">
+            ✦ Ask AI
+          </a>
+          <button class="glass-btn glass-btn-sm bookmark-toggle-btn {% if mat.id in user_bookmarks %}active{% endif %}" data-material-id="{{ mat.id }}" title="Bookmark">
+            <span class="bookmark-icon">{% if mat.id in user_bookmarks %}★{% else %}☆{% endif %}</span>
+          </button>
+          <a href="{{ url_for('materials_routes.download_material', material_id=mat.id) }}" class="glass-btn glass-btn-sm" title="Download original PDF">
+            ⬇
+          </a>
+        </div>
+      </div>
+    {% else %}
+      <div class="glass-card" style="grid-column: 1 / -1; text-align: center; padding: 50px;">
+        <div style="font-size: 2.5rem; margin-bottom: 12px;">📚</div>
+        <h3 style="color: #fff; margin-bottom: 8px;">No curriculum materials match your filter</h3>
+        <p style="color: var(--text-muted);">Try choosing "All Departments" or reset the search query.</p>
+      </div>
+    {% endfor %}
+  </div>
+
+</div>
+{% endblock %}
+

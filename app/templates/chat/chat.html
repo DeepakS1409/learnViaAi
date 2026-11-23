@@ -1,0 +1,293 @@
+{% extends "base.html" %}
+
+{% block title %}Padika AI — Grounded Academic Chatbot{% endblock %}
+
+{% block footer %}
+{# Omit standard footer for full-height chat interface #}
+{% endblock %}
+
+{% block content %}
+<input type="hidden" id="activeSessionId" value="{{ current_session.id if current_session else '' }}">
+
+<div class="chat-layout">
+  
+  <!-- GLASS CHAT HISTORY SIDEBAR -->
+  <aside class="chat-sidebar">
+    
+    <div class="chat-sidebar-header">
+      <button id="newChatBtn" class="glass-btn glass-btn-primary" style="width: 100%; justify-content: center; padding: 11px;">
+        + New Chat Discussion
+      </button>
+    </div>
+
+    <div class="chat-sessions-list">
+      <div style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.8px; font-weight: 700; color: var(--text-dim); padding: 0 8px 6px;">
+        Previous Sessions
+      </div>
+
+      {% for sess in sessions %}
+        <a href="{{ url_for('chat_routes.chat_view', session_id=sess.id) }}"
+           class="chat-session-item {% if current_session and current_session.id == sess.id %}active{% endif %}">
+          <div style="display: flex; align-items: center; gap: 8px; overflow: hidden;">
+            <span style="font-size: 0.95rem;">💬</span>
+            <span class="session-title">{{ sess.title }}</span>
+          </div>
+
+          <button class="session-delete-btn" data-session-id="{{ sess.id }}" title="Delete chat">
+            ✕
+          </button>
+        </a>
+      {% else %}
+        <div style="padding: 16px 8px; font-size: 0.85rem; color: var(--text-dim); text-align: center;">
+          No previous sessions.
+        </div>
+      {% endfor %}
+    </div>
+
+    <!-- Sidebar Footer Link to Full History -->
+    <div style="padding: 14px 20px; border-top: 1px solid rgba(255, 255, 255, 0.08); font-size: 0.85rem;">
+      <a href="{{ url_for('chat_routes.history') }}" style="color: var(--text-muted); text-decoration: none; display: flex; align-items: center; gap: 6px;">
+        <span>📜 All Chat Archives</span>
+      </a>
+    </div>
+
+  </aside>
+
+  <!-- MAIN CONVERSATION VIEWPORT -->
+  <main class="chat-main">
+    
+    <!-- TOP CONTROLS & SCOPING BAR -->
+    <header class="chat-controls-bar">
+      
+      <div class="chat-filters">
+        <!-- Subject Scope Dropdown -->
+        <select id="subjectSelect" class="chat-filter-select">
+          <option value="">✦ All Subjects (College Wide)</option>
+          {% for sub in subjects %}
+            <option value="{{ sub.id }}" {% if preselected_subject and preselected_subject|int == sub.id %}selected{% elif current_session and current_session.subject_id == sub.id %}selected{% endif %}>
+              {{ sub.code }} — {{ sub.name }}
+            </option>
+          {% endfor %}
+        </select>
+
+        <!-- Document Scope Dropdown -->
+        <select id="documentSelect" class="chat-filter-select">
+          <option value="">✦ All Uploaded Documents</option>
+          {% for mat in materials %}
+            <option value="{{ mat.id }}" {% if preselected_material and preselected_material|int == mat.id %}selected{% elif current_session and current_session.material_id == mat.id %}selected{% endif %}>
+              📄 {{ mat.title[:35] }} ({{ mat.subject_code }})
+            </option>
+          {% endfor %}
+        </select>
+
+        <!-- Language Preference Dropdown -->
+        <select id="languageSelect" class="chat-filter-select" style="background: rgba(168, 85, 247, 0.15); border-color: rgba(168, 85, 247, 0.4);">
+          <option value="en" {% if current_session and current_session.language_preference == 'en' %}selected{% endif %}>🇬🇧 English</option>
+          <option value="ta" {% if current_session and current_session.language_preference == 'ta' %}selected{% endif %}>🇮🇳 தமிழ் (Tamil)</option>
+          <option value="tanglish" {% if current_session and current_session.language_preference == 'tanglish' %}selected{% endif %}>🗣️ Tanglish (Tamil in English)</option>
+        </select>
+      </div>
+
+      <!-- Exam Mark Format Pills & Settings -->
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <div class="format-pills">
+          <button type="button" class="format-pill active" data-format="normal">Normal</button>
+          <button type="button" class="format-pill" data-format="2-mark">2-Mark</button>
+          <button type="button" class="format-pill" data-format="13-mark">13-Mark</button>
+          <button type="button" class="format-pill" data-format="16-mark">16-Mark</button>
+        </div>
+
+        <button type="button" class="glass-btn glass-btn-sm" id="aiSettingsBtn" title="Configure Gemini API Key / AI Engine">
+          ⚙️ AI Settings
+        </button>
+      </div>
+
+    </header>
+
+    <!-- MESSAGE FEED -->
+    <div class="chat-messages-container" id="chatMessages">
+      
+      {% if not messages %}
+        <!-- WELCOME SCREEN WITH PROMPT STARTERS -->
+        <div class="chat-welcome">
+          <div class="welcome-icon-box">✦</div>
+          <h2 class="welcome-title">How can I assist your study today?</h2>
+          <p class="welcome-subtitle">
+            Answers are grounded strictly in your professors' uploaded curriculum materials with verifiable page citations.
+          </p>
+
+          <div class="prompt-suggestions">
+            <div class="suggestion-card" data-prompt="What is Machine Learning? Give a crisp 2-mark definition with types." data-format="2-mark" data-lang="en">
+              <strong style="color: #fff; display: block; margin-bottom: 4px;">2-Mark Definition:</strong>
+              "What is Machine Learning? Crisp 2-mark exam definition with types."
+            </div>
+
+            <div class="suggestion-card" data-prompt="Explain the OSI model layers and their functions with architecture diagram description." data-format="13-mark" data-lang="en">
+              <strong style="color: #fff; display: block; margin-bottom: 4px;">13-Mark Exam Answer:</strong>
+              "Explain OSI model layers and functions with diagram description."
+            </div>
+
+            <div class="suggestion-card" data-prompt="Tamil-la B-Tree index and Normalization pathi explain pannunga bro." data-format="normal" data-lang="tanglish">
+              <strong style="color: #fff; display: block; margin-bottom: 4px;">Tanglish Concept Explanation:</strong>
+              "Tamil-la B-Tree index and Normalization pathi simple-ah சொல்லுங்க."
+            </div>
+
+            <div class="suggestion-card" data-prompt="Discuss Supervised vs Unsupervised Learning with mathematical formulation, loss functions, and applications." data-format="16-mark" data-lang="en">
+              <strong style="color: #fff; display: block; margin-bottom: 4px;">16-Mark University Paper:</strong>
+              "Supervised vs Unsupervised Learning in-depth comparison."
+            </div>
+          </div>
+        </div>
+      {% else %}
+        {% for msg in messages %}
+          {% if msg.sender == 'user' %}
+            <div class="message-row user">
+              <div class="message-avatar user-avatar-badge">You</div>
+              <div class="message-bubble">{{ msg.message }}</div>
+            </div>
+          {% else %}
+            <div class="message-row ai">
+              <div class="message-avatar ai-avatar-badge">✦</div>
+              <div class="message-bubble">
+                <div class="message-text" id="msg-{{ msg.id }}">{{ msg.message|safe }}</div>
+
+                {% if msg.sources %}
+                  <div class="citations-wrapper">
+                    <div class="citations-header">📚 Faculty Sources & Citations:</div>
+                    <div class="citations-grid">
+                      {% for src in msg.sources %}
+                        <a href="{{ url_for('materials_routes.view_pdf', material_id=src.material_id) }}#page={{ src.page_number }}" target="_blank" class="citation-card" title="{{ src.snippet }}">
+                          <span>📄 {{ src.document_title }}</span>
+                          <span class="citation-page-badge">Page {{ src.page_number }}</span>
+                        </a>
+                      {% endfor %}
+                    </div>
+                  </div>
+                {% endif %}
+
+                <div class="message-actions">
+                  <button class="msg-action-btn" onclick="copyAnswerText('msg-{{ msg.id }}', this)">
+                    <span>📋 Copy Answer</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          {% endif %}
+        {% endfor %}
+      {% endif %}
+
+    </div>
+
+    <!-- FLOATING GLASS INPUT BOX -->
+    <div class="chat-input-wrapper">
+      <form id="chatForm" class="chat-input-box">
+        <textarea id="chatInput" class="chat-input-field" placeholder="Ask a question about your subject notes (English, தமிழ், or Tanglish)..." rows="1" required></textarea>
+        <button type="submit" id="chatSendBtn" class="chat-send-btn" title="Send Question (Enter)">
+          ➤
+        </button>
+      </form>
+    </div>
+
+  </main>
+
+</div>
+
+<!-- AI SETTINGS MODAL -->
+<div id="aiSettingsModal" class="glass-modal-overlay">
+  <div class="glass-panel glass-modal-content" style="padding: 30px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <span style="font-size: 1.3rem;">⚙️</span>
+        <h3 style="font-size: 1.25rem; font-weight: 700; color: #fff;">AI Intelligence & API Settings</h3>
+      </div>
+      <button type="button" class="modal-close-btn" style="background: none; border: none; color: #fff; font-size: 1.5rem; cursor: pointer;">&times;</button>
+    </div>
+
+    <form id="aiSettingsForm">
+      <div style="background: rgba(168, 85, 247, 0.12); border: 1px solid rgba(168, 85, 247, 0.3); border-radius: 12px; padding: 14px; margin-bottom: 18px; font-size: 0.85rem; color: #e9d5ff; line-height: 1.5;">
+        ✦ <strong>Grounded RAG Modes:</strong><br>
+        1. <strong>Local Document Intelligence (Default):</strong> Runs offline, extracting exact definitions, formulas, and bullet points directly from professor-uploaded PDFs.<br>
+        2. <strong>Google Gemini API:</strong> Add your Gemini API key below to unlock generative multi-lingual synthesis grounded in the course materials.
+      </div>
+
+      <div class="glass-form-group">
+        <label class="glass-label" for="settingApiKey">
+          Google Gemini API Key
+          <a href="https://aistudio.google.com/" target="_blank" style="color: #38bdf8; font-size: 0.78rem; margin-left: auto; text-decoration: none;">Get Free Key ↗</a>
+        </label>
+        <input type="password" id="settingApiKey" class="glass-input" placeholder="AIzaSy... (leave blank to use Local Document Engine)">
+        <div style="font-size: 0.78rem; color: var(--text-dim); margin-top: 4px;" id="currentKeyStatus">
+          Status: {% if has_gemini_key %}<span style="color: #10b981; font-weight: 600;">Active Gemini Key Configured</span>{% else %}Local Document Engine Active{% endif %}
+        </div>
+      </div>
+
+      <div class="glass-form-group">
+        <label class="glass-label" for="settingModel">Gemini Model</label>
+        <select id="settingModel" class="glass-select">
+          <option value="gemini-1.5-flash">gemini-1.5-flash (Fast & Recommended)</option>
+          <option value="gemini-2.0-flash">gemini-2.0-flash (Next Gen High Speed)</option>
+          <option value="gemini-1.5-pro">gemini-1.5-pro (High Reasoning)</option>
+        </select>
+      </div>
+
+      <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 24px;">
+        <button type="button" class="glass-btn modal-close-btn">Close</button>
+        <button type="submit" class="glass-btn glass-btn-primary">Save Settings</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const settingsBtn = document.getElementById('aiSettingsBtn');
+  const settingsModal = document.getElementById('aiSettingsModal');
+  const settingsForm = document.getElementById('aiSettingsForm');
+  const apiKeyInput = document.getElementById('settingApiKey');
+  const modelSelect = document.getElementById('settingModel');
+
+  if (settingsBtn && settingsModal) {
+    settingsBtn.addEventListener('click', async () => {
+      try {
+        const resp = await fetch('/chat/api/settings');
+        const data = await resp.json();
+        if (data.masked_key) {
+          apiKeyInput.placeholder = 'Configured (' + data.masked_key + ')';
+        }
+        if (data.model) {
+          modelSelect.value = data.model;
+        }
+      } catch (err) {
+        console.error(err);
+      }
+      settingsModal.classList.add('active');
+    });
+  }
+
+  if (settingsForm) {
+    settingsForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const keyVal = apiKeyInput.value.trim();
+      const modelVal = modelSelect.value;
+      try {
+        const resp = await fetch('/chat/api/settings', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ gemini_api_key: keyVal, gemini_model: modelVal })
+        });
+        const data = await resp.json();
+        if (data.success) {
+          showToast(data.has_key ? 'Gemini API key saved & active!' : 'Switched to Local Document Engine', 'success');
+          settingsModal.classList.remove('active');
+        }
+      } catch (err) {
+        showToast('Error saving settings', 'danger');
+      }
+    });
+  }
+});
+</script>
+
+<script src="{{ url_for('static', filename='js/chat.js') }}"></script>
+{% endblock %}
+

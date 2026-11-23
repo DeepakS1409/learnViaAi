@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block title %}Chat Archives & History — Padika AI{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 30px; padding-bottom: 60px;">
+  
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px; flex-wrap: wrap; gap: 16px;">
+    <div>
+      <h1 style="font-size: 2rem; font-weight: 800; color: #fff;">AI Discussion Archives</h1>
+      <p style="color: var(--text-muted); font-size: 0.95rem;">Review and resume previous academic consultations and exam answer sessions</p>
+    </div>
+
+    <div style="display: flex; gap: 10px;">
+      <a href="{{ url_for('chat_routes.chat_view') }}" class="glass-btn glass-btn-primary">
+        + Start New Chat
+      </a>
+      <a href="{{ url_for('main.dashboard_redirect') }}" class="glass-btn glass-btn-secondary">
+        ← My Dashboard
+      </a>
+    </div>
+  </div>
+
+  <div class="glass-panel" style="padding: 24px;">
+    <div class="glass-table-container">
+      <table class="glass-table">
+        <thead>
+          <tr>
+            <th>Session Title</th>
+            <th>Subject / Document Scope</th>
+            <th>Messages</th>
+            <th>Last Active</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for s in sessions %}
+            <tr>
+              <td>
+                <div style="font-weight: 700; color: #fff; font-size: 1rem;">
+                  💬 {{ s.title }}
+                </div>
+                {% if s.last_message %}
+                  <div style="font-size: 0.82rem; color: var(--text-dim); margin-top: 4px; max-width: 380px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                    "{{ s.last_message }}"
+                  </div>
+                {% endif %}
+              </td>
+
+              <td>
+                {% if s.subject_name %}
+                  <span class="glass-badge glass-badge-purple">{{ s.subject_code }}</span>
+                  <div style="font-size: 0.82rem; color: var(--text-muted); margin-top: 4px;">{{ s.subject_name }}</div>
+                {% elif s.material_title %}
+                  <span class="glass-badge glass-badge-blue">Doc Scoped</span>
+                  <div style="font-size: 0.82rem; color: var(--text-muted); margin-top: 4px;">{{ s.material_title }}</div>
+                {% else %}
+                  <span class="glass-badge glass-badge-green">General Campus</span>
+                {% endif %}
+              </td>
+
+              <td>
+                <span style="font-weight: 600; color: #fff;">{{ s.message_count }}</span> msgs
+              </td>
+
+              <td style="font-size: 0.85rem; color: var(--text-dim);">
+                {{ s.updated_at|datetimeformat }}
+              </td>
+
+              <td>
+                <div style="display: flex; gap: 8px;">
+                  <a href="{{ url_for('chat_routes.chat_view', session_id=s.id) }}" class="glass-btn glass-btn-sm glass-btn-primary">
+                    Resume →
+                  </a>
+                  <button type="button" class="glass-btn glass-btn-sm glass-btn-danger session-delete-btn" data-session-id="{{ s.id }}" style="opacity: 1;">
+                    Delete
+                  </button>
+                </div>
+              </td>
+            </tr>
+          {% else %}
+            <tr>
+              <td colspan="5" style="text-align: center; padding: 40px; color: var(--text-muted);">
+                No previous chat sessions found. 
+                <a href="{{ url_for('chat_routes.chat_view') }}" style="color: #38bdf8; margin-left: 6px;">Start your first academic AI conversation</a>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<script src="{{ url_for('static', filename='js/chat.js') }}"></script>
+{% endblock %}
+
